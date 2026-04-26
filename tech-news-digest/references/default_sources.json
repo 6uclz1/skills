@@ -1,0 +1,82 @@
+[
+  {
+    "id": "hacker-news",
+    "name": "Hacker News",
+    "language": "en",
+    "url": "https://news.ycombinator.com/rss",
+    "weight": 1.5,
+    "tags": ["startup", "software", "ai", "security", "systems"]
+  },
+  {
+    "id": "lobsters",
+    "name": "Lobsters",
+    "language": "en",
+    "url": "https://lobste.rs/rss",
+    "weight": 1.4,
+    "tags": ["programming", "systems", "security", "web"]
+  },
+  {
+    "id": "reddit-programming",
+    "name": "Reddit r/programming",
+    "language": "en",
+    "url": "https://www.reddit.com/r/programming/.rss",
+    "weight": 1.0,
+    "tags": ["programming", "software", "discussion"]
+  },
+  {
+    "id": "reddit-machine-learning",
+    "name": "Reddit r/MachineLearning",
+    "language": "en",
+    "url": "https://www.reddit.com/r/MachineLearning/.rss",
+    "weight": 1.0,
+    "tags": ["ai", "machine learning", "research"]
+  },
+  {
+    "id": "dev-community",
+    "name": "DEV Community",
+    "language": "en",
+    "url": "https://dev.to/feed",
+    "weight": 0.8,
+    "tags": ["web", "programming", "tutorial"]
+  },
+  {
+    "id": "hatena-it",
+    "name": "Hatena Bookmark IT",
+    "language": "ja",
+    "url": "https://b.hatena.ne.jp/hotentry/it.rss",
+    "weight": 1.5,
+    "tags": ["japan", "software", "web", "infrastructure"]
+  },
+  {
+    "id": "qiita-popular",
+    "name": "Qiita Popular Items",
+    "language": "ja",
+    "url": "https://qiita.com/popular-items/feed",
+    "weight": 1.1,
+    "tags": ["programming", "tutorial", "japan"]
+  },
+  {
+    "id": "zenn-trending",
+    "name": "Zenn Trending",
+    "language": "ja",
+    "url": "https://zenn.dev/feed",
+    "weight": 1.2,
+    "tags": ["programming", "ai", "japan", "web"]
+  },
+  {
+    "id": "jser-info",
+    "name": "JSer.info",
+    "language": "ja",
+    "url": "https://jser.info/rss/",
+    "weight": 1.2,
+    "tags": ["javascript", "typescript", "web", "japan"]
+  },
+  {
+    "id": "publickey",
+    "name": "Publickey",
+    "language": "ja",
+    "url": "https://www.publickey1.jp/atom.xml",
+    "weight": 1.2,
+    "tags": ["cloud", "infrastructure", "enterprise", "japan"]
+  }
+]

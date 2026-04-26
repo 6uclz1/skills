@@ -1,0 +1,4 @@
+interface:
+  display_name: "Tech News Digest"
+  short_description: "Scan EN/JA tech feeds into a concise digest"
+  default_prompt: "Use $tech-news-digest to scan recent English and Japanese tech community feeds and summarize the most important items."
