@@ -1,0 +1,4 @@
+interface:
+  display_name: "Compose Music"
+  short_description: "Design songs with rhythm, theory, and arrangement workflows."
+  default_prompt: "Use $compose-music to design a complete Ableton-ready song sketch."
