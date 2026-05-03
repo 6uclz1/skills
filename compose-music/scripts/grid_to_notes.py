@@ -21,6 +21,7 @@ DEFAULT_VELOCITIES = {
 
 ACTIVE_SYMBOLS = {"x", "X", "1"}
 REST_SYMBOLS = {".", "-", "_", "0"}
+METADATA_FIELDS = ("timing_feel", "swing_amount", "shuffle_amount", "humanization", "polymeter_reset_bar")
 
 
 def _default_velocity(name):
@@ -85,10 +86,20 @@ def grid_to_notes(grid):
     return notes
 
 
+def grid_to_note_payload(grid):
+    """Return notes plus timing metadata that should survive Ableton handoff."""
+    metadata = {}
+    for field in METADATA_FIELDS:
+        if field in grid:
+            metadata[field] = grid[field]
+    return {"notes": grid_to_notes(grid), "metadata": metadata}
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description="Convert 16/32-step drum grids to Ableton note JSON.")
     parser.add_argument("input", help="Path to a grid JSON file, or '-' for stdin.")
     parser.add_argument("--pretty", action="store_true", help="Pretty-print JSON output.")
+    parser.add_argument("--payload", action="store_true", help="Output notes with preserved timing metadata.")
     args = parser.parse_args(argv)
 
     try:
@@ -97,13 +108,13 @@ def main(argv=None):
         else:
             with open(args.input, "r", encoding="utf-8") as handle:
                 grid = json.load(handle)
-        notes = grid_to_notes(grid)
+        output = grid_to_note_payload(grid) if args.payload else grid_to_notes(grid)
     except Exception as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1
 
     indent = 2 if args.pretty else None
-    print(json.dumps(notes, indent=indent))
+    print(json.dumps(output, indent=indent))
     return 0
 
 

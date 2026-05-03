@@ -56,6 +56,23 @@ class GridToNotesTests(unittest.TestCase):
                 }
             )
 
+    def test_preserves_timing_feel_metadata_in_payload(self):
+        payload = self.mod.grid_to_note_payload(
+            {
+                "bars": 1,
+                "resolution": 16,
+                "timing_feel": "garage shuffle",
+                "swing_amount": 0.58,
+                "humanization": {"timing_ms": 7, "velocity": 5},
+                "tracks": {"Closed Hat": {"pitch": 42, "steps": "X.X.X.X.X.X.X.X."}},
+            }
+        )
+
+        self.assertEqual(payload["metadata"]["timing_feel"], "garage shuffle")
+        self.assertEqual(payload["metadata"]["swing_amount"], 0.58)
+        self.assertEqual(payload["metadata"]["humanization"], {"timing_ms": 7, "velocity": 5})
+        self.assertEqual(len(payload["notes"]), 8)
+
 
 class ChordsToNotesTests(unittest.TestCase):
     def setUp(self):
@@ -115,6 +132,73 @@ class ChordsToNotesTests(unittest.TestCase):
 
         self.assertEqual([note["pitch"] for note in notes[:3]], [60, 64, 67])
         self.assertEqual([note["pitch"] for note in notes[3:]], [70, 74, 77])
+
+    def test_supports_borrowed_major_flat_chords(self):
+        notes = self.mod.chords_to_notes(
+            {
+                "tonic": "C",
+                "mode": "major",
+                "roman": [
+                    {"roman": "bIII", "quality": "major"},
+                    {"roman": "bVI", "quality": "major"},
+                    {"roman": "bVII", "quality": "major"},
+                ],
+                "octave": 4,
+            }
+        )
+
+        chords = [[note["pitch"] for note in notes[i : i + 3]] for i in range(0, len(notes), 3)]
+        self.assertEqual(chords, [[63, 67, 70], [68, 72, 75], [70, 74, 77]])
+
+    def test_supports_first_inversion_seventh_and_slash_bass(self):
+        notes = self.mod.chords_to_notes(
+            {
+                "tonic": "C",
+                "mode": "major",
+                "roman": [
+                    {"roman": "I", "quality": "major", "extensions": ["7"], "inversion": 1},
+                    {"roman": "V", "quality": "dominant", "extensions": ["7"], "slash": "B"},
+                ],
+                "octave": 4,
+            }
+        )
+
+        first = [note["pitch"] for note in notes[:4]]
+        second = [note["pitch"] for note in notes[4:]]
+        self.assertEqual(first, [64, 67, 71, 72])
+        self.assertEqual(second[0], 59)
+        self.assertEqual(sorted(pitch % 12 for pitch in second[1:]), [2, 5, 7, 11])
+
+    def test_supports_explicit_chord_quality_without_roman_case_guessing(self):
+        notes = self.mod.chords_to_notes(
+            {
+                "tonic": "A",
+                "mode": "minor",
+                "roman": [
+                    {"roman": "i", "quality": "minor", "extensions": ["7"]},
+                    {"roman": "IV", "quality": "major"},
+                ],
+                "octave": 3,
+            }
+        )
+
+        self.assertEqual([note["pitch"] for note in notes[:4]], [57, 60, 64, 67])
+        self.assertEqual([note["pitch"] for note in notes[4:]], [62, 66, 69])
+
+
+class CompositionSchemaTests(unittest.TestCase):
+    def test_schema_file_defines_required_contract_fields(self):
+        schema_path = ROOT / "references" / "composition_spec.schema.json"
+        with schema_path.open("r", encoding="utf-8") as handle:
+            schema = json.load(handle)
+
+        self.assertEqual(schema["$id"], "https://codex.local/compose-music/composition_spec.schema.json")
+        self.assertEqual(
+            schema["required"],
+            ["version", "brief", "tracks", "sections", "finish_criteria"],
+        )
+        self.assertIn("browser_query", schema["$defs"]["track"]["required"])
+        self.assertIn("identity_carrier", schema["$defs"]["section"]["properties"])
 
 
 class ValidateCompositionSpecTests(unittest.TestCase):
@@ -197,6 +281,25 @@ class ValidateCompositionSpecTests(unittest.TestCase):
         self.assertIn("tracks[0].drum_rows.Kick includes unsupported step symbol '?'", result["errors"])
         self.assertIn("section lengths sum to 12, expected 8", result["errors"])
 
+    def test_rejects_unknown_section_role_tracks(self):
+        spec = self.valid_spec()
+        spec["sections"][0]["foreground"] = ["Lead"]
+
+        result = self.mod.validate_spec(spec)
+
+        self.assertFalse(result["ok"])
+        self.assertIn("sections[0].foreground includes unknown track 'Lead'", result["errors"])
+
+    def test_rejects_invalid_timing_metadata(self):
+        spec = self.valid_spec()
+        spec["tracks"][0]["timing_feel"] = "shuffle"
+        spec["tracks"][0]["swing_amount"] = 1.2
+
+        result = self.mod.validate_spec(spec)
+
+        self.assertFalse(result["ok"])
+        self.assertIn("tracks[0].swing_amount must be 0.0-1.0", result["errors"])
+
     def test_cli_returns_nonzero_for_invalid_spec_file(self):
         spec = self.valid_spec()
         spec["tracks"][0]["notes"][0]["duration"] = 0
@@ -210,6 +313,38 @@ class ValidateCompositionSpecTests(unittest.TestCase):
                 exit_code = self.mod.main([handle.name])
 
         self.assertEqual(exit_code, 1)
+
+
+class HandoffPlanTests(unittest.TestCase):
+    def setUp(self):
+        self.validator = load_script("validate_composition_spec")
+        self.mod = load_script("composition_spec_to_handoff_plan")
+
+    def valid_spec(self):
+        return ValidateCompositionSpecTests().valid_spec()
+
+    def test_builds_ableton_handoff_plan_from_valid_spec(self):
+        spec = self.valid_spec()
+        spec["tracks"][0]["timing_feel"] = "garage shuffle"
+        spec["tracks"][0]["swing_amount"] = 0.58
+
+        plan = self.mod.build_handoff_plan(spec)
+
+        self.assertEqual(plan["preflight_intent"], ["wait-ready", "doctor-if-needed", "tracks-list"])
+        self.assertEqual(plan["set_tempo"], 124)
+        self.assertEqual(plan["browser_searches"][0]["query"], "Drum Rack dry electronic kit")
+        self.assertEqual(plan["track_plan"][1]["name"], "Bass")
+        self.assertEqual(plan["clip_plan"][0]["length_beats"], 4.0)
+        self.assertEqual(plan["clip_plan"][0]["timing"]["swing_amount"], 0.58)
+        self.assertEqual(plan["arrangement_sections"][1]["active_tracks"], ["Drums", "Bass"])
+        self.assertIn("do not invent browser paths", plan["handoff_notes"][1])
+
+    def test_rejects_invalid_spec_before_handoff(self):
+        spec = self.valid_spec()
+        spec["tracks"][0]["browser_query"] = "drums/Kits/Fake Kit.adg"
+
+        with self.assertRaisesRegex(ValueError, "browser_query"):
+            self.mod.build_handoff_plan(spec)
 
 
 if __name__ == "__main__":

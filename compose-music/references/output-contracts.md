@@ -6,6 +6,8 @@ Use this reference when the user asks for Ableton-ready implementation, MIDI JSO
 
 Emit `composition_spec` only when requested, when the user asks for Ableton implementation, or when a structured handoff would reduce ambiguity.
 
+JSON Schema: `references/composition_spec.schema.json`.
+
 Required top-level fields:
 
 - `version`: currently `"1.0"`.
@@ -34,6 +36,7 @@ Example:
       "role": "rhythm",
       "clip_length_bars": 2,
       "browser_query": "Drum Rack dry electronic kit",
+      "timing_feel": "straight",
       "notes": [
         {"pitch": 36, "start_time": 0.0, "duration": 0.25, "velocity": 110, "mute": false}
       ]
@@ -56,6 +59,7 @@ Example:
       "foreground": [],
       "midground": ["Texture/FX"],
       "background": ["Drums"],
+      "identity_carrier": "Texture/FX",
       "move": "add filtered hats in bar 7",
       "transition_event": "short noise rise into Groove"
     }
@@ -75,8 +79,9 @@ Example:
 - `clip_length_bars`: positive number; multiply by 4.0 for beats in 4/4.
 - `browser_query`: search query or placeholder, never a fake path.
 - `notes`: Ableton note JSON objects with `pitch`, `start_time`, `duration`, `velocity`, and `mute`.
+- Optional timing fields: `timing_feel`, `swing_amount`, `shuffle_amount`, `humanization`, and `polymeter_reset_bar`.
 
-Use `scripts/grid_to_notes.py` for drum rows and `scripts/chords_to_notes.py` for chord tracks when exact MIDI notes matter.
+Use `scripts/grid_to_notes.py` for drum rows and `scripts/chords_to_notes.py` for chord tracks when exact MIDI notes matter. Use `grid_to_notes.py --payload` when timing feel metadata should be preserved alongside note JSON.
 
 ## Section Fields
 
@@ -86,6 +91,7 @@ Use `scripts/grid_to_notes.py` for drum rows and `scripts/chords_to_notes.py` fo
 - `density`: 0-5, as defined in `arrangement-energy.md`.
 - `active_tracks`: track names active in the section.
 - `foreground`, `midground`, `background`: role allocation for complete song plans.
+- `identity_carrier`: track name carrying the section identity.
 - `move`: primary add/mute/subtraction decision.
 - `transition_event`: fill, riser, silence, pickup, or automation event into the next section.
 
@@ -98,3 +104,16 @@ Before handing off:
 3. Fix errors before using `$ableton-cli`.
 
 Do not expose raw validation mechanics to the user unless they asked for implementation details.
+
+## ableton_handoff_plan v1
+
+Use `scripts/composition_spec_to_handoff_plan.py` to turn a valid `composition_spec` into an intermediate `ableton_handoff_plan` before asking `$ableton-cli` to operate on Live.
+
+The plan separates:
+
+- `preflight_intent`: readiness checks such as wait-ready, doctor-if-needed, and tracks-list.
+- `browser_searches`: role-based search queries for the active Ableton browser catalog.
+- `track_plan`: ordered track names and musical roles.
+- `clip_plan`: clip lengths, note source, and timing metadata.
+- `arrangement_sections`: section bars, density, active tracks, role layers, identity carrier, moves, and transition events.
+- `finish_criteria`: completion checks from the source spec.

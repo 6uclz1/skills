@@ -1,6 +1,6 @@
 ---
 name: compose-music
-description: Compose, arrange, and prepare Ableton-ready electronic music sketches with drum grids, pitch palettes, chord progressions, basslines, melodies, section plans, MIDI note specs, and finish checklists. Use for song sketches, loop-to-song expansion, MIDI composition plans, and composition handoff to ableton-cli. Do not use for pure Ableton command lookup, installation, or mixing-only tasks.
+description: Compose Ableton-ready electronic music sketches: drum grids, chord progressions, basslines, melodies, arrangements, MIDI note specs, and loop-to-song plans. Use for music composition and Ableton handoff; not for pure Ableton command lookup or mixing-only advice.
 ---
 
 # Compose Music
@@ -57,7 +57,7 @@ For full song sketches, produce these sections:
 - **Ableton Execution Notes**: track names, clip lengths, scene names, MIDI note JSON strategy, and `$ableton-cli` handoff notes.
 - **Finish Checklist**: decisions to commit, parts to remove, renders or bounces to make, and completion criteria.
 
-For Ableton handoff mode, also include a machine-readable `composition_spec` JSON object. Read `references/output-contracts.md` before producing it.
+For Ableton handoff mode, also include a machine-readable `composition_spec` JSON object. Read `references/output-contracts.md` and validate against `references/composition_spec.schema.json` before producing it.
 
 For narrow requests, return only the relevant sections; do not emit the full song-sketch template.
 
@@ -74,9 +74,10 @@ Before finalizing Ableton-ready material, verify:
 
 Use bundled scripts when deterministic conversion or validation is useful:
 
-- `scripts/grid_to_notes.py`: 16-step or 32-step drum grid to Ableton note JSON.
-- `scripts/chords_to_notes.py`: tonic, mode, and roman numerals to chord note JSON.
+- `scripts/grid_to_notes.py`: 16-step or 32-step drum grid to Ableton note JSON; use `--payload` when swing, shuffle, humanization, or polymeter metadata must survive handoff.
+- `scripts/chords_to_notes.py`: tonic, mode, roman numerals, explicit chord quality, borrowed chords, inversions, slash chords, and extensions to chord note JSON.
 - `scripts/validate_composition_spec.py`: validate Ableton-ready `composition_spec`.
+- `scripts/composition_spec_to_handoff_plan.py`: convert a valid `composition_spec` into `ableton_handoff_plan` JSON for `$ableton-cli` workflows.
 
 ## Reference Selection
 
@@ -102,6 +103,8 @@ Do not duplicate the `$ableton-cli` command catalog. Hand off intent and structu
 - Notes: inline note JSON or a path to a generated notes file.
 - Arrangement: scene names, start bars, durations, density, active tracks.
 - Finish: save/export target if requested.
+
+When the user asks to implement a sketch, produce or use `ableton_handoff_plan` as the intermediate artifact before any DAW operation.
 
 Always avoid hard-coding browser item paths, Drum Rack kits, or device targets. Ask `$ableton-cli` workflows to search the active Ableton browser catalog first, then use returned paths or URIs.
 

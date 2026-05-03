@@ -1,0 +1,67 @@
+{
+  "global_checks": [
+    {
+      "id": "no_fake_browser_paths",
+      "description": "Browser targets must be search queries or placeholders, not hard-coded Ableton paths.",
+      "type": "absence_regex",
+      "pattern": "(?:^|\\s)(?:file:|~|/|\\./|\\.\\./|[A-Za-z]:\\\\|\\S+/\\S+\\.(?:adg|adv|als|wav|aif|aiff|mp3|mid|midi|alp)\\b)"
+    },
+    {
+      "id": "no_command_catalog_duplication",
+      "description": "Ableton handoff should not paste the full ableton-cli command catalog.",
+      "type": "max_regex_count",
+      "pattern": "uv run ableton-cli",
+      "max": 4
+    },
+    {
+      "id": "kick_bass_relationship_when_present",
+      "description": "Outputs mentioning both kick and bass must describe their relationship.",
+      "type": "conditional_keywords",
+      "when_all": ["kick", "bass"],
+      "any": ["composite", "gap", "sidechain", "offbeat", "duration", "register", "low-end", "low end", "mask"]
+    }
+  ],
+  "prompt_checks": {
+    "test-01": [
+      {"id": "d_dorian", "type": "all_keywords", "keywords": ["D", "dorian"]},
+      {"id": "drum_grid", "type": "any_keywords", "keywords": ["grid", "16-step", "32-step"]},
+      {"id": "ableton_spec", "type": "requires_composition_spec"}
+    ],
+    "test-02": [
+      {"id": "json_only", "type": "forbid_full_template"},
+      {"id": "beat_positions", "type": "all_keywords", "keywords": ["start_time", "0.0", "1.0"]}
+    ],
+    "test-03": [
+      {"id": "arrangement_64", "type": "section_sum", "expected_bars": 64},
+      {"id": "density_moves", "type": "all_keywords", "keywords": ["density", "transition"]}
+    ],
+    "test-04": [
+      {"id": "bassline_only", "type": "forbid_full_template"},
+      {"id": "roots_and_rhythm", "type": "all_keywords", "keywords": ["root", "rhythm"]}
+    ],
+    "test-05": [
+      {"id": "ableton_handoff_spec", "type": "requires_composition_spec"},
+      {"id": "browser_queries", "type": "any_keywords", "keywords": ["browser_query", "browser search", "search query"]}
+    ],
+    "test-06": [
+      {"id": "finish_plan_only", "type": "forbid_full_template"},
+      {"id": "commit_export", "type": "all_keywords", "keywords": ["commit", "export"]}
+    ],
+    "test-07": [
+      {"id": "garage_swing", "type": "all_keywords", "keywords": ["garage", "swing"]},
+      {"id": "no_full_song_plan", "type": "forbid_full_template"}
+    ],
+    "test-08": [
+      {"id": "valid_spec_present", "type": "requires_composition_spec"},
+      {"id": "note_json", "type": "all_keywords", "keywords": ["pitch", "start_time", "duration", "velocity", "mute"]}
+    ],
+    "test-09": [
+      {"id": "low_end_composite", "type": "any_keywords", "keywords": ["composite", "mask", "gap", "duration", "register"]},
+      {"id": "concrete_edits", "type": "any_keywords", "keywords": ["shorten", "move", "octave", "offbeat", "sidechain"]}
+    ],
+    "test-10": [
+      {"id": "ambient_density", "type": "all_keywords", "keywords": ["ambient", "density", "transition"]},
+      {"id": "roles", "type": "all_keywords", "keywords": ["foreground", "midground", "background"]}
+    ]
+  }
+}

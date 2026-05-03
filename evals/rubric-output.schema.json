@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codex.local/compose-music/rubric-output.schema.json",
+  "title": "compose-music rubric output",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["prompt_id", "score", "checks", "failures"],
+  "properties": {
+    "prompt_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/check"
+      }
+    },
+    "failures": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "$defs": {
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "ok", "message"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ok": {
+          "type": "boolean"
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

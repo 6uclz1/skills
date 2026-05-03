@@ -83,6 +83,35 @@ def _validate_drum_rows(rows, path, errors):
                 errors.append(f"{path}.{row_name} includes unsupported step symbol {symbol!r}")
 
 
+def _validate_timing_metadata(obj, path, errors):
+    if "timing_feel" in obj and not isinstance(obj["timing_feel"], str):
+        errors.append(f"{path}.timing_feel must be a string")
+    for field in ("swing_amount", "shuffle_amount"):
+        if field in obj:
+            value = obj[field]
+            if not isinstance(value, (int, float)):
+                errors.append(f"{path}.{field} must be numeric")
+            elif not 0.0 <= value <= 1.0:
+                errors.append(f"{path}.{field} must be 0.0-1.0")
+    if "humanization" in obj and not isinstance(obj["humanization"], dict):
+        errors.append(f"{path}.humanization must be an object")
+    if "polymeter_reset_bar" in obj:
+        value = obj["polymeter_reset_bar"]
+        if not isinstance(value, int):
+            errors.append(f"{path}.polymeter_reset_bar must be an integer")
+        elif value <= 0:
+            errors.append(f"{path}.polymeter_reset_bar must be positive")
+
+
+def _validate_track_refs(values, path, track_names, errors):
+    if not isinstance(values, list):
+        errors.append(f"{path} must be an array")
+        return
+    for track_name in values:
+        if track_name not in track_names:
+            errors.append(f"{path} includes unknown track {track_name!r}")
+
+
 def validate_spec(spec):
     errors = []
     if not isinstance(spec, dict):
@@ -91,6 +120,8 @@ def validate_spec(spec):
     for field in ("version", "brief", "tracks", "sections", "finish_criteria"):
         if field not in spec:
             errors.append(f"{field} is required")
+    if "version" in spec and spec["version"] != "1.0":
+        errors.append("version must be '1.0'")
 
     brief = spec.get("brief", {})
     _check_required(brief, "brief", REQUIRED_BRIEF_FIELDS, errors)
@@ -131,6 +162,7 @@ def validate_spec(spec):
                 errors.append(f"{path}.browser_query must be a search query or placeholder, not a path")
             if "drum_rows" in track:
                 _validate_drum_rows(track["drum_rows"], f"{path}.drum_rows", errors)
+            _validate_timing_metadata(track, path, errors)
             notes = track.get("notes", [])
             if not isinstance(notes, list):
                 errors.append(f"{path}.notes must be an array")
@@ -159,12 +191,12 @@ def validate_spec(spec):
             if not isinstance(density, int) or not 0 <= density <= 5:
                 errors.append(f"{path}.density must be an integer from 0 to 5")
             active_tracks = section.get("active_tracks", [])
-            if not isinstance(active_tracks, list):
-                errors.append(f"{path}.active_tracks must be an array")
-            else:
-                for track_name in active_tracks:
-                    if track_name not in track_names:
-                        errors.append(f"{path}.active_tracks includes unknown track {track_name!r}")
+            _validate_track_refs(active_tracks, f"{path}.active_tracks", track_names, errors)
+            for role_field in ("foreground", "midground", "background"):
+                if role_field in section:
+                    _validate_track_refs(section[role_field], f"{path}.{role_field}", track_names, errors)
+            if "identity_carrier" in section and section["identity_carrier"] not in track_names:
+                errors.append(f"{path}.identity_carrier includes unknown track {section['identity_carrier']!r}")
         if isinstance(brief, dict) and isinstance(brief.get("length_bars"), int) and total != brief["length_bars"]:
             errors.append(f"section lengths sum to {total}, expected {brief['length_bars']}")
 

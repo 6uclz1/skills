@@ -49,6 +49,22 @@ ROMAN_DEGREES = {
     "VII": 6,
 }
 
+QUALITY_INTERVALS = {
+    "major": [0, 4, 7],
+    "maj": [0, 4, 7],
+    "minor": [0, 3, 7],
+    "min": [0, 3, 7],
+    "m": [0, 3, 7],
+    "diminished": [0, 3, 6],
+    "dim": [0, 3, 6],
+    "augmented": [0, 4, 8],
+    "aug": [0, 4, 8],
+    "dominant": [0, 4, 7],
+    "dom": [0, 4, 7],
+    "sus2": [0, 2, 7],
+    "sus4": [0, 5, 7],
+}
+
 
 def _note_to_midi(note_name, octave):
     key = note_name.strip().upper()
@@ -58,15 +74,15 @@ def _note_to_midi(note_name, octave):
 
 
 def _parse_roman(symbol):
-    match = re.fullmatch(r"([b#]?)([ivIV]+)(?:\d+)?", symbol.strip())
+    match = re.fullmatch(r"([b#]?)([ivIV]+)(.*)?", symbol.strip())
     if not match:
         raise ValueError(f"unsupported roman numeral {symbol!r}")
-    accidental, numeral = match.groups()
+    accidental, numeral, suffix = match.groups()
     degree_key = numeral.upper()
     if degree_key not in ROMAN_DEGREES:
         raise ValueError(f"unsupported roman degree {symbol!r}")
     accidental_offset = {"b": -1, "#": 1, "": 0}[accidental]
-    return ROMAN_DEGREES[degree_key], accidental_offset
+    return ROMAN_DEGREES[degree_key], accidental_offset, suffix or ""
 
 
 def _scale_pitch_classes(tonic_pc, mode):
@@ -91,6 +107,106 @@ def _chord_pcs(scale_pcs, degree, accidental_offset, chord_type):
     elif chord_type != "triad":
         raise ValueError("chord_type must be triad or seventh")
     return pcs
+
+
+def _quality_intervals(quality, extensions):
+    normalized = str(quality).lower()
+    if normalized not in QUALITY_INTERVALS:
+        raise ValueError(f"unsupported chord quality {quality!r}")
+    intervals = list(QUALITY_INTERVALS[normalized])
+    normalized_extensions = {str(extension).lower() for extension in extensions}
+    if "9" in normalized_extensions:
+        normalized_extensions.add("7")
+    if "7" in normalized_extensions:
+        if normalized in ("major", "maj"):
+            intervals.append(11)
+        elif normalized in ("diminished", "dim"):
+            intervals.append(9)
+        else:
+            intervals.append(10)
+    if "maj7" in normalized_extensions or "major7" in normalized_extensions:
+        intervals.append(11)
+    if "b7" in normalized_extensions or "dom7" in normalized_extensions:
+        intervals.append(10)
+    if "9" in normalized_extensions:
+        intervals.append(14)
+    return sorted(set(intervals), key=intervals.index)
+
+
+def _explicit_chord_pcs(root_pc, quality, extensions):
+    return [(root_pc + interval) % 12 for interval in _quality_intervals(quality, extensions)]
+
+
+def _normalize_chord_spec(symbol, default_chord_type):
+    if isinstance(symbol, dict):
+        if "roman" not in symbol:
+            raise ValueError("chord spec object requires roman")
+        extensions = symbol.get("extensions", [])
+        if isinstance(extensions, str):
+            extensions = [extensions]
+        return {
+            "roman": str(symbol["roman"]),
+            "quality": symbol.get("quality"),
+            "extensions": list(extensions),
+            "inversion": symbol.get("inversion"),
+            "slash": symbol.get("slash") or symbol.get("bass"),
+            "voicing": symbol.get("voicing"),
+        }
+
+    text = str(symbol)
+    if "/" in text:
+        text, slash = text.split("/", 1)
+    else:
+        slash = None
+    degree, accidental_offset, suffix = _parse_roman(text)
+    extensions = []
+    quality = None
+    suffix_lower = suffix.lower()
+    if "maj7" in suffix_lower or "major7" in suffix_lower:
+        quality = "major"
+        extensions.append("maj7")
+    elif "m7" in suffix_lower or "min7" in suffix_lower:
+        quality = "minor"
+        extensions.append("7")
+    elif "7" in suffix_lower:
+        extensions.append("7")
+    elif default_chord_type == "seventh":
+        extensions.append("7")
+    return {
+        "roman": text,
+        "quality": quality,
+        "extensions": extensions,
+        "inversion": None,
+        "slash": slash,
+        "voicing": None,
+        "_parsed": (degree, accidental_offset),
+    }
+
+
+def _apply_inversion(pitches, inversion):
+    if inversion in (None, 0, "0", "root", "root-position"):
+        return pitches
+    aliases = {"first": 1, "first-inversion": 1, "second": 2, "second-inversion": 2, "third": 3}
+    count = aliases.get(str(inversion), inversion)
+    try:
+        count = int(count)
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"unsupported inversion {inversion!r}") from exc
+    if count < 0 or count >= len(pitches):
+        raise ValueError(f"unsupported inversion {inversion!r}")
+    inverted = list(pitches)
+    for _ in range(count):
+        inverted.append(inverted.pop(0) + 12)
+    return sorted(inverted)
+
+
+def _slash_bass_midi(note_name, chord_pitches):
+    pitch = _note_to_midi(note_name, 3)
+    while pitch >= chord_pitches[0]:
+        pitch -= 12
+    while pitch < 0:
+        pitch += 12
+    return pitch
 
 
 def _close_voicing(base_midi, pcs):
@@ -161,9 +277,21 @@ def chords_to_notes(spec):
     notes = []
     previous = None
     for chord_index, symbol in enumerate(roman):
-        degree, accidental_offset = _parse_roman(symbol)
-        pcs = _chord_pcs(scale_pcs, degree, accidental_offset, chord_type)
-        pitches = _apply_voicing(tonic_midi, pcs, voicing, previous)
+        chord_spec = _normalize_chord_spec(symbol, chord_type)
+        if "_parsed" in chord_spec:
+            degree, accidental_offset = chord_spec["_parsed"]
+        else:
+            degree, accidental_offset, _suffix = _parse_roman(chord_spec["roman"])
+        root_pc = (scale_pcs[degree] + accidental_offset) % 12
+        if chord_spec["quality"]:
+            pcs = _explicit_chord_pcs(root_pc, chord_spec["quality"], chord_spec["extensions"])
+        else:
+            pcs = _chord_pcs(scale_pcs, degree, accidental_offset, chord_type)
+        chord_voicing = chord_spec["voicing"] or voicing
+        pitches = _apply_voicing(tonic_midi, pcs, chord_voicing, previous)
+        pitches = _apply_inversion(pitches, chord_spec["inversion"])
+        if chord_spec["slash"]:
+            pitches = [_slash_bass_midi(chord_spec["slash"], pitches)] + pitches
         previous = pitches
         start_time = chord_index * duration
         for pitch in pitches:

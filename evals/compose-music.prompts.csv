@@ -1,0 +1,11 @@
+id,prompt,mode,requested_length_bars,narrow,requires_spec
+test-01,"Create an 8-bar dark techno loop in D dorian, Ableton-ready.",ableton_handoff,8,false,true
+test-02,"Turn this kick/snare/hat 16-step grid into MIDI note JSON.",pattern,,true,false
+test-03,"I have a 4-bar loop. Expand it into a 64-bar arrangement.",song_sketch,64,false,false
+test-04,"Give only a bassline for this chord loop: i | VI | III | VII.",pattern,,true,false
+test-05,"Implement the sketch in Ableton using ableton-cli.",ableton_handoff,,false,true
+test-06,"I am stuck over-editing a loop. Give me a finish plan.",repair,,true,false
+test-07,"Write a garage drum and bass pattern with swing notes, but do not include a full song plan.",pattern,,true,false
+test-08,"Create a melodic techno sketch with a composition_spec and validate-ready note JSON.",ableton_handoff,,false,true
+test-09,"Diagnose why my kick and bass feel crowded in a 124 BPM house loop.",repair,,true,false
+test-10,"Make a 32-bar ambient arrangement with density and transition events.",song_sketch,32,false,false

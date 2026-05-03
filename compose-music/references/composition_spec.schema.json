@@ -1,0 +1,209 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codex.local/compose-music/composition_spec.schema.json",
+  "title": "compose-music composition_spec v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "brief", "tracks", "sections", "finish_criteria"],
+  "properties": {
+    "version": {
+      "const": "1.0"
+    },
+    "brief": {
+      "$ref": "#/$defs/brief"
+    },
+    "tracks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/track"
+      }
+    },
+    "sections": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/section"
+      }
+    },
+    "finish_criteria": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  },
+  "$defs": {
+    "brief": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["genre", "bpm", "meter", "key", "mode", "length_bars", "creative_constraint"],
+      "properties": {
+        "genre": {
+          "type": "string",
+          "minLength": 1
+        },
+        "bpm": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "meter": {
+          "const": "4/4"
+        },
+        "key": {
+          "type": "string",
+          "minLength": 1
+        },
+        "mode": {
+          "type": "string",
+          "minLength": 1
+        },
+        "length_bars": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "creative_constraint": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "track": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["name", "role", "clip_length_bars", "browser_query", "notes"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "role": {
+          "type": "string",
+          "minLength": 1
+        },
+        "clip_length_bars": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "browser_query": {
+          "type": "string",
+          "minLength": 1
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/note"
+          }
+        },
+        "drum_rows": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "timing_feel": {
+          "type": "string",
+          "minLength": 1
+        },
+        "swing_amount": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "humanization": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "polymeter_reset_bar": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "note": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["pitch", "start_time", "duration", "velocity", "mute"],
+      "properties": {
+        "pitch": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 127
+        },
+        "start_time": {
+          "type": "number",
+          "minimum": 0
+        },
+        "duration": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "velocity": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 127
+        },
+        "mute": {
+          "type": "boolean"
+        }
+      }
+    },
+    "section": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["name", "start_bar", "length_bars", "density", "active_tracks"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "start_bar": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "length_bars": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "density": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 5
+        },
+        "active_tracks": {
+          "$ref": "#/$defs/track_refs"
+        },
+        "foreground": {
+          "$ref": "#/$defs/track_refs"
+        },
+        "midground": {
+          "$ref": "#/$defs/track_refs"
+        },
+        "background": {
+          "$ref": "#/$defs/track_refs"
+        },
+        "identity_carrier": {
+          "type": "string",
+          "minLength": 1
+        },
+        "move": {
+          "type": "string",
+          "minLength": 1
+        },
+        "transition_event": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "track_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  }
+}
