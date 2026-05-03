@@ -55,9 +55,9 @@ def grid_to_notes(grid):
         if pitch < 0 or pitch > 127:
             raise ValueError(f"{track_name}.pitch must be 0-127")
 
-        steps = _compact_steps(row.get("steps", ""))
+        steps = _compact_steps(row.get("steps", row.get("grid", "")))
         if len(steps) != expected_steps:
-            raise ValueError(f"{track_name}.steps must contain {expected_steps} steps")
+            raise ValueError(f"{track_name}.steps/grid must contain {expected_steps} steps")
 
         velocity = int(row.get("velocity", _default_velocity(track_name)))
         if velocity < 1 or velocity > 127:

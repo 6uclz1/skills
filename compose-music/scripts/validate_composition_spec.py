@@ -117,7 +117,7 @@ def validate_spec(spec):
     if not isinstance(spec, dict):
         return {"ok": False, "errors": ["composition_spec must be an object"]}
 
-    for field in ("version", "brief", "tracks", "sections", "finish_criteria"):
+    for field in ("version", "brief", "tracks", "sections", "handoff", "finish_criteria"):
         if field not in spec:
             errors.append(f"{field} is required")
     if "version" in spec and spec["version"] != "1.0":
@@ -199,6 +199,23 @@ def validate_spec(spec):
                 errors.append(f"{path}.identity_carrier includes unknown track {section['identity_carrier']!r}")
         if isinstance(brief, dict) and isinstance(brief.get("length_bars"), int) and total != brief["length_bars"]:
             errors.append(f"section lengths sum to {total}, expected {brief['length_bars']}")
+
+    handoff = spec.get("handoff", {})
+    _check_required(handoff, "handoff", ("requires_browser_search", "browser_queries", "export_target"), errors)
+    if isinstance(handoff, dict):
+        if "requires_browser_search" in handoff and not isinstance(handoff["requires_browser_search"], bool):
+            errors.append("handoff.requires_browser_search must be boolean")
+        browser_queries = handoff.get("browser_queries", [])
+        if not isinstance(browser_queries, list) or not browser_queries:
+            errors.append("handoff.browser_queries must be a non-empty array")
+        else:
+            for index, query in enumerate(browser_queries):
+                if not isinstance(query, str) or not query.strip():
+                    errors.append(f"handoff.browser_queries[{index}] must be a non-empty string")
+                elif _is_path_like(query):
+                    errors.append(f"handoff.browser_queries[{index}] must be a search query or placeholder, not a path")
+        if "export_target" in handoff and not isinstance(handoff["export_target"], str):
+            errors.append("handoff.export_target must be a string")
 
     finish_criteria = spec.get("finish_criteria", [])
     if not isinstance(finish_criteria, list) or not finish_criteria:

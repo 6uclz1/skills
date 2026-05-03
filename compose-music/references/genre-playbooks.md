@@ -48,6 +48,7 @@ Use these defaults when the user names a genre or omits one. Adapt them to the u
 
 ## Drum and Bass
 
+- Alias triggers: `DnB`, `dnb`, `jungle`, `drum & bass`
 - Tempo: 160-176 BPM
 - Meter: 4/4
 - Drum identity: breakbeat or two-step kick/snare with ghost notes

@@ -236,6 +236,11 @@ def _move_near(previous, current):
 
 
 def _apply_voicing(base_midi, pcs, voicing, previous=None):
+    if voicing == "compact":
+        voicing = "close"
+    elif voicing == "spread":
+        voicing = "open"
+
     if voicing in ("close", "stab", "pad"):
         pitches = _close_voicing(base_midi, pcs)
         if voicing == "pad":

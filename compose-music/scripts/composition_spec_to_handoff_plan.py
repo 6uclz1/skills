@@ -100,10 +100,12 @@ def build_handoff_plan(spec):
         "preflight_intent": ["wait-ready", "doctor-if-needed", "tracks-list"],
         "set_tempo": spec["brief"]["bpm"],
         "meter": meter,
+        "requires_browser_search": spec["handoff"]["requires_browser_search"],
         "browser_searches": browser_searches,
         "track_plan": track_plan,
         "clip_plan": clip_plan,
         "arrangement_sections": arrangement_sections,
+        "export_target": spec["handoff"]["export_target"],
         "finish_criteria": spec["finish_criteria"],
         "handoff_notes": [
             "Search the active Ableton browser catalog before loading devices or kits.",

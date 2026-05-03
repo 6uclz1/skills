@@ -1,6 +1,6 @@
 ---
 name: compose-music
-description: Compose Ableton-ready electronic music sketches: drum grids, chord progressions, basslines, melodies, arrangements, MIDI note specs, and loop-to-song plans. Use for music composition and Ableton handoff; not for pure Ableton command lookup or mixing-only advice.
+description: Create structured electronic music sketches and Ableton-ready composition specs with drum grids, chords, basslines, melodies, arrangements, MIDI note JSON, and loop-to-song handoff plans. Use for composition, arrangement, repair, and Ableton implementation planning; not for pure Ableton command lookup or mixing-only advice.
 ---
 
 # Compose Music
@@ -11,15 +11,13 @@ Use this skill as the composition layer above `$ableton-cli`: decide the music f
 
 Do not use this skill for pure Ableton command lookup, installation, transport control, browser inspection, or mixing-only advice. Use `$ableton-cli` directly for DAW operation and a mixing-focused skill or general answer for mix-only work.
 
-## Mode Selection
+## Output Modes
 
 Choose the smallest output mode that satisfies the request:
 
-- **Idea mode**: brief, palette, and 2-3 directions.
-- **Pattern mode**: drum, bass, chord, or melody grid only.
-- **Song sketch mode**: full human-readable output contract.
-- **Ableton handoff mode**: full output plus `composition_spec`.
-- **Repair mode**: diagnose an existing loop and propose edits.
+- **Sketch Mode**: for brainstorming, composition advice, pattern-only requests, and non-Ableton work. Return only the relevant human-readable sections.
+- **Ableton Plan Mode**: for "make this in Ableton", "implement", "generate clips", "MIDI JSON", or handoff requests. Return a concise human plan plus `composition_spec`.
+- **Repair Mode**: for fixing an existing loop, arrangement, bassline, melody, or chord progression. Return diagnosis, edited material, and minimal execution notes.
 
 Default assumptions when the user gives no constraints:
 - Meter: `4/4`
@@ -30,7 +28,7 @@ Default assumptions when the user gives no constraints:
 - Genre: choose one focused electronic direction and state it.
 - Track count: 5 tracks: `Drums`, `Bass`, `Chords`, `Lead`, `Texture/FX`.
 
-Ask at most one clarifying question only when the missing constraint would materially change the result.
+Assume defaults for missing tempo, key, meter, genre, length, and track count. Ask at most one clarifying question only when the missing constraint would materially change the result or create conflicting deliverables.
 
 ## Core Workflow
 
@@ -57,7 +55,14 @@ For full song sketches, produce these sections:
 - **Ableton Execution Notes**: track names, clip lengths, scene names, MIDI note JSON strategy, and `$ableton-cli` handoff notes.
 - **Finish Checklist**: decisions to commit, parts to remove, renders or bounces to make, and completion criteria.
 
-For Ableton handoff mode, also include a machine-readable `composition_spec` JSON object. Read `references/output-contracts.md` and validate against `references/composition_spec.schema.json` before producing it.
+For Ableton Plan Mode, always include:
+
+- A concise human-readable plan.
+- A fenced JSON block named `composition_spec`.
+- A validation checklist.
+- No hard-coded browser paths, rack names, device presets, local file paths, or fake URIs.
+
+Read `references/output-contracts.md` and `references/composition-spec-schema.md`; validate against `references/composition_spec.schema.json` before producing the final handoff.
 
 For narrow requests, return only the relevant sections; do not emit the full song-sketch template.
 
@@ -68,7 +73,8 @@ Before finalizing Ableton-ready material, verify:
 - Section bar counts sum to the requested length.
 - MIDI notes use valid `pitch`, `start_time`, `duration`, `velocity`, and `mute` fields.
 - Bass and kick are designed as one composite low-end part.
-- Browser targets are search queries or placeholders, not hard-coded paths.
+- Browser targets are search queries or placeholders, not hard-coded paths, rack names, device presets, local file paths, or fake URIs.
+- `composition_spec.handoff.browser_queries` repeats the browser search intent and remains path-free.
 - Section plans include density, foreground/midground/background roles, add/mute moves, and transition events when arranging a complete song.
 - Narrow requests do not return unrelated full-contract sections.
 
@@ -87,9 +93,11 @@ Use bundled scripts when deterministic conversion or validation is useful:
 - Read `references/pattern-recipes.md` when generating concrete drum, harmony, bass, or melody patterns.
 - Read `references/ableton-composition-bridge.md` when the output should be executable or easily translated with `$ableton-cli`.
 - Read `references/output-contracts.md` when the user asks for Ableton-ready implementation, MIDI JSON, or structured handoff.
+- Read `references/composition-spec-schema.md` when building or checking `composition_spec` fields and validation rules.
+- Read `references/eval-cases.md` when running regression-style prompt checks.
 - Read `references/genre-playbooks.md` when selecting genre defaults or making genre-specific decisions.
-- Read `references/arrangement-energy.md` when expanding loops into 32- or 64-bar forms.
-- Read `references/sound-design-palettes.md` when choosing browser search queries or role-based sound targets.
+- Read `references/arrangement-energy-curves.md` when expanding loops into 32-, 64-, 96-, or 128-bar forms.
+- Read `references/sound-design-intent.md` when choosing role-based sound targets without naming fixed presets.
 - Read `references/quality-rubric.md` when evaluating a draft or running regression-style checks.
 
 ## Ableton Handoff
@@ -97,11 +105,12 @@ Use bundled scripts when deterministic conversion or validation is useful:
 Do not duplicate the `$ableton-cli` command catalog. Hand off intent and structured data:
 
 - Preflight intent: wait-ready, doctor if needed, then tracks list.
-- Browser searches required by role, for example `Drum Rack`, `Kit`, `Operator bass`, `Drift bass`, `Wavetable pad`, `Analog keys`.
+- Browser search intent by role, for example `Drum Rack`, `Kit`, `Operator bass`, `Drift bass`, `Wavetable pad`, `Analog keys`; resolve exact paths or URIs only from active `$ableton-cli` search results.
 - Track plan: default order `0 Drums`, `1 Bass`, `2 Chords`, `3 Lead`, `4 Texture/FX`.
 - Clip plan: scene clips with lengths in bars and beats.
 - Notes: inline note JSON or a path to a generated notes file.
 - Arrangement: scene names, start bars, durations, density, active tracks.
+- Safety: prefer dry-run or plan-first execution, inspect JSON command results, and stop on non-zero `$ableton-cli` exit codes.
 - Finish: save/export target if requested.
 
 When the user asks to implement a sketch, produce or use `ableton_handoff_plan` as the intermediate artifact before any DAW operation.

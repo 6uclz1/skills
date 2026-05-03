@@ -46,6 +46,19 @@ class GridToNotesTests(unittest.TestCase):
             ],
         )
 
+    def test_accepts_grid_alias_from_skill_contract(self):
+        notes = self.mod.grid_to_notes(
+            {
+                "bars": 1,
+                "resolution": 16,
+                "tracks": {
+                    "Kick": {"pitch": 36, "grid": "X...X...X...X..."},
+                },
+            }
+        )
+
+        self.assertEqual([note["start_time"] for note in notes], [0.0, 1.0, 2.0, 3.0])
+
     def test_rejects_unsupported_grid_symbols(self):
         with self.assertRaisesRegex(ValueError, "unsupported step symbol"):
             self.mod.grid_to_notes(
@@ -133,6 +146,29 @@ class ChordsToNotesTests(unittest.TestCase):
         self.assertEqual([note["pitch"] for note in notes[:3]], [60, 64, 67])
         self.assertEqual([note["pitch"] for note in notes[3:]], [70, 74, 77])
 
+    def test_supports_compact_and_spread_voicing_names(self):
+        compact = self.mod.chords_to_notes(
+            {
+                "tonic": "C",
+                "mode": "major",
+                "roman": ["I"],
+                "voicing": "compact",
+                "octave": 4,
+            }
+        )
+        spread = self.mod.chords_to_notes(
+            {
+                "tonic": "C",
+                "mode": "major",
+                "roman": ["I"],
+                "voicing": "spread",
+                "octave": 4,
+            }
+        )
+
+        self.assertEqual([note["pitch"] for note in compact], [60, 64, 67])
+        self.assertEqual([note["pitch"] for note in spread], [60, 67, 76])
+
     def test_supports_borrowed_major_flat_chords(self):
         notes = self.mod.chords_to_notes(
             {
@@ -187,6 +223,18 @@ class ChordsToNotesTests(unittest.TestCase):
 
 
 class CompositionSchemaTests(unittest.TestCase):
+    def test_skill_declares_required_output_modes_and_handoff_contract(self):
+        skill_text = (ROOT / "SKILL.md").read_text(encoding="utf-8")
+
+        for phrase in (
+            "Sketch Mode",
+            "Ableton Plan Mode",
+            "Repair Mode",
+            "fenced JSON block named `composition_spec`",
+            "No hard-coded browser paths",
+        ):
+            self.assertIn(phrase, skill_text)
+
     def test_schema_file_defines_required_contract_fields(self):
         schema_path = ROOT / "references" / "composition_spec.schema.json"
         with schema_path.open("r", encoding="utf-8") as handle:
@@ -195,10 +243,24 @@ class CompositionSchemaTests(unittest.TestCase):
         self.assertEqual(schema["$id"], "https://codex.local/compose-music/composition_spec.schema.json")
         self.assertEqual(
             schema["required"],
-            ["version", "brief", "tracks", "sections", "finish_criteria"],
+            ["version", "brief", "tracks", "sections", "handoff", "finish_criteria"],
         )
         self.assertIn("browser_query", schema["$defs"]["track"]["required"])
         self.assertIn("identity_carrier", schema["$defs"]["section"]["properties"])
+        self.assertIn("browser_queries", schema["$defs"]["handoff"]["required"])
+
+    def test_reference_files_cover_backlog_contracts(self):
+        expected = {
+            "composition-spec-schema.md": ("sections[*].length_bars", "browser_query"),
+            "eval-cases.md": ("E01", "Pass threshold"),
+            "arrangement-energy-curves.md": ("32-bar sketch", "128-bar"),
+            "sound-design-intent.md": ("Search query", "avoid preset names"),
+        }
+
+        for filename, phrases in expected.items():
+            text = (ROOT / "references" / filename).read_text(encoding="utf-8")
+            for phrase in phrases:
+                self.assertIn(phrase, text)
 
 
 class ValidateCompositionSpecTests(unittest.TestCase):
@@ -253,6 +315,11 @@ class ValidateCompositionSpecTests(unittest.TestCase):
                     "active_tracks": ["Drums", "Bass"],
                 },
             ],
+            "handoff": {
+                "requires_browser_search": True,
+                "browser_queries": ["Drum Rack dry electronic kit", "Operator bass"],
+                "export_target": "rough arrangement render",
+            },
             "finish_criteria": [
                 "8-bar arrangement exists",
                 "kick and bass do not mask each other",
@@ -299,6 +366,15 @@ class ValidateCompositionSpecTests(unittest.TestCase):
 
         self.assertFalse(result["ok"])
         self.assertIn("tracks[0].swing_amount must be 0.0-1.0", result["errors"])
+
+    def test_rejects_path_like_handoff_browser_queries(self):
+        spec = self.valid_spec()
+        spec["handoff"]["browser_queries"] = ["drums/Kits/Fake Kit.adg"]
+
+        result = self.mod.validate_spec(spec)
+
+        self.assertFalse(result["ok"])
+        self.assertIn("handoff.browser_queries[0] must be a search query or placeholder, not a path", result["errors"])
 
     def test_cli_returns_nonzero_for_invalid_spec_file(self):
         spec = self.valid_spec()

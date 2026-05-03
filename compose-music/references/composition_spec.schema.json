@@ -4,7 +4,7 @@
   "title": "compose-music composition_spec v1",
   "type": "object",
   "additionalProperties": false,
-  "required": ["version", "brief", "tracks", "sections", "finish_criteria"],
+  "required": ["version", "brief", "tracks", "sections", "handoff", "finish_criteria"],
   "properties": {
     "version": {
       "const": "1.0"
@@ -25,6 +25,9 @@
       "items": {
         "$ref": "#/$defs/section"
       }
+    },
+    "handoff": {
+      "$ref": "#/$defs/handoff"
     },
     "finish_criteria": {
       "type": "array",
@@ -193,6 +196,28 @@
           "minLength": 1
         },
         "transition_event": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "handoff": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["requires_browser_search", "browser_queries", "export_target"],
+      "properties": {
+        "requires_browser_search": {
+          "type": "boolean"
+        },
+        "browser_queries": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "export_target": {
           "type": "string",
           "minLength": 1
         }

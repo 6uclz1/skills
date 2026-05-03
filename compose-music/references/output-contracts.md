@@ -6,7 +6,8 @@ Use this reference when the user asks for Ableton-ready implementation, MIDI JSO
 
 Emit `composition_spec` only when requested, when the user asks for Ableton implementation, or when a structured handoff would reduce ambiguity.
 
-JSON Schema: `references/composition_spec.schema.json`.
+Readable schema guide: `references/composition-spec-schema.md`.
+Machine schema: `references/composition_spec.schema.json`.
 
 Required top-level fields:
 
@@ -14,6 +15,7 @@ Required top-level fields:
 - `brief`: genre, BPM, meter, key, mode, length, and creative constraint.
 - `tracks`: ordered track plan with roles, clip lengths, browser queries, and notes.
 - `sections`: arrangement sections with bar counts, density, and active tracks.
+- `handoff`: Ableton browser search intent and export target.
 - `finish_criteria`: concrete completion checks.
 
 Example:
@@ -64,6 +66,11 @@ Example:
       "transition_event": "short noise rise into Groove"
     }
   ],
+  "handoff": {
+    "requires_browser_search": true,
+    "browser_queries": ["Drum Rack dry electronic kit", "Operator bass", "Wavetable pad"],
+    "export_target": "rough arrangement render"
+  },
   "finish_criteria": [
     "64-bar arrangement exists",
     "kick and bass do not mask each other",
@@ -88,12 +95,18 @@ Use `scripts/grid_to_notes.py` for drum rows and `scripts/chords_to_notes.py` fo
 - `name`: scene or arrangement section name.
 - `start_bar`: 1-based bar number.
 - `length_bars`: section duration.
-- `density`: 0-5, as defined in `arrangement-energy.md`.
+- `density`: 0-5, as defined in `arrangement-energy-curves.md`.
 - `active_tracks`: track names active in the section.
 - `foreground`, `midground`, `background`: role allocation for complete song plans.
 - `identity_carrier`: track name carrying the section identity.
 - `move`: primary add/mute/subtraction decision.
 - `transition_event`: fill, riser, silence, pickup, or automation event into the next section.
+
+## Handoff Fields
+
+- `requires_browser_search`: usually `true`; exact Ableton browser paths and URIs must come from the active catalog.
+- `browser_queries`: deduplicated search intent collected from track `browser_query` values.
+- `export_target`: short description of the expected save, render, or rough bounce.
 
 ## Validation
 
