@@ -7,6 +7,8 @@ Repository-scoped Codex skills maintained by `6uclz1`.
 - `compose-music`: compose Ableton-ready electronic music sketches, MIDI grids, arrangements, `composition_spec` handoffs, evals, and helper scripts.
 - `tech-news-digest`: scan English and Japanese developer community feeds and produce concise technology digests.
 
+Each skill has its own README or `SKILL.md` for detailed usage. `compose-music/README.md` is the entry point for composition specs, helper scripts, examples, and evals.
+
 ## Installing A Skill
 
 Use a direct folder install from this repository checkout:
@@ -38,6 +40,8 @@ Run the executable eval harness in dry-run mode:
 ```bash
 node evals/run-compose-music-evals.mjs --dry-run
 ```
+
+The dry-run checks the 25-prompt rubric configuration and uses `score >= 0.9` as the merge threshold for saved or Codex-generated answers.
 
 When `codex exec --json` is available, capture traces and rubric output:
 

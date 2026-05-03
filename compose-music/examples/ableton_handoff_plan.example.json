@@ -1,0 +1,31 @@
+{
+  "version": "1.0",
+  "source": "compose-music composition_spec",
+  "preflight_intent": ["wait-ready", "doctor-if-needed", "tracks-list"],
+  "set_tempo": 132,
+  "set_meter": "4/4",
+  "meter": "4/4",
+  "requires_browser_search": true,
+  "browser_searches": [
+    {"track_index": 0, "track_name": "Drums", "role": "rhythm", "query": "Drum Rack dry techno kit"},
+    {"track_index": 1, "track_name": "Bass", "role": "low-end identity", "query": "Operator bass"}
+  ],
+  "track_plan": [
+    {"index": 0, "name": "Drums", "role": "rhythm", "browser_query": "Drum Rack dry techno kit", "sound_intent": "hard transient drum kit", "shape_intent": "short kick decay", "kick_relationship": null},
+    {"index": 1, "name": "Bass", "role": "low-end identity", "browser_query": "Operator bass", "sound_intent": "short mono sub pulse", "shape_intent": "fast decay", "kick_relationship": "answer"}
+  ],
+  "clip_plan": [
+    {"track_index": 0, "track_name": "Drums", "clip_slot": 0, "clip_name": "Drums Main", "length_bars": 1, "length_beats": 4.0, "note_source": {"type": "inline", "notes": []}, "timing": {}},
+    {"track_index": 1, "track_name": "Bass", "clip_slot": 0, "clip_name": "Bass Main", "length_bars": 2, "length_beats": 8.0, "note_source": {"type": "inline", "notes": []}, "timing": {}}
+  ],
+  "arrangement_sections": [
+    {"name": "Intro", "start_bar": 1, "length_bars": 2, "density": 1, "active_tracks": ["Drums"], "foreground": [], "midground": [], "background": ["Drums"], "identity_carrier": "Drums", "move": "start with kick only", "transition_event": "hat pickup"}
+  ],
+  "export_target": "8-bar rough loop",
+  "finish_criteria": ["rough loop exists", "browser search results are resolved before loading"],
+  "handoff_notes": [
+    "Search the active Ableton browser catalog before loading devices or kits.",
+    "Use returned paths or URIs from ableton-cli browser results; do not invent browser paths.",
+    "Create tracks and clips from this plan, then add note_source data to clips."
+  ]
+}

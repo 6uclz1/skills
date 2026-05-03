@@ -9,3 +9,18 @@ test-07,"Write a garage drum and bass pattern with swing notes, but do not inclu
 test-08,"Create a melodic techno sketch with a composition_spec and validate-ready note JSON.",ableton_handoff,,false,true
 test-09,"Diagnose why my kick and bass feel crowded in a 124 BPM house loop.",repair,,true,false
 test-10,"Make a 32-bar ambient arrangement with density and transition events.",song_sketch,32,false,false
+test-11,"Only give me a melody motif for a D dorian techno lead.",pattern,,true,false
+test-12,"Make a 7/8 techno loop for Ableton but keep it implementation-safe.",ableton_handoff,,false,false
+test-13,"Create a garage drum and bass hybrid loop with swing and a clear drop entry.",song_sketch,,false,false
+test-14,"Give a synthwave chord progression only, with roman numerals and voicing notes.",pattern,,true,false
+test-15,"Make an Ableton handoff plan but I did not provide a genre.",ableton_handoff,,false,true
+test-16,"Repair this broken spec: handoff is missing and one browser query is drums/Kits/Fake Kit.adg.",repair,,true,false
+test-17,"Make a beat-light ambient texture plan with no drum kit.",song_sketch,,false,false
+test-18,"Write a shuffled UK garage drum grid and preserve timing metadata.",pattern,,true,false
+test-19,"Create a polymeter IDM percussion idea with reset metadata but keep Ableton handoff safe.",pattern,,true,false
+test-20,"Make an acid techno loop where sound design is described by acoustic intent, not preset names.",ableton_handoff,16,false,true
+test-21,"Expand a 16-bar minimal techno loop into a 96-bar arrangement.",song_sketch,96,false,false
+test-22,"Give only borrowed chord options for A minor, including slash or inversion examples.",pattern,,true,false
+test-23,"Create a bassline and state whether it avoids, doubles, answers, or intentionally overlaps the kick.",pattern,,true,false
+test-24,"Convert a validated melodic techno composition_spec into an ableton_handoff_plan artifact.",ableton_handoff,,false,true
+test-25,"Make a 128-bar progressive house arrangement with density, identity carriers, and transitions.",song_sketch,128,false,false

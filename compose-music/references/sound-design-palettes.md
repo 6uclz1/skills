@@ -1,6 +1,8 @@
 # Sound Design Palettes
 
-Use this reference for Ableton-ready sound direction without hard-coding browser item paths, kits, presets, or device targets. Provide search queries and musical roles; let `$ableton-cli` or the operator resolve exact browser results.
+Use this as a quick reference for Ableton-ready sound direction. The formal contract lives in `sound-design-intent.md`; this file only summarizes common role intents and broad search phrases.
+
+Never hard-code browser item paths, kits, presets, or device targets. Provide `sound_intent`, `shape_intent`, and broad `browser_query` values; let `$ableton-cli` or the operator resolve exact browser results.
 
 ## Drums
 

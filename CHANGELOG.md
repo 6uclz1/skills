@@ -1,5 +1,20 @@
 # Changelog
 
+## v0.3.0 - 2026-05-03
+
+### Added
+
+- Added `compose-music/README.md`, examples, `VERSION`, and a GitHub Actions workflow for unit tests and eval dry-runs.
+- Added `ableton_handoff_plan` documentation and schema as the formal intermediate handoff artifact.
+- Expanded compose-music eval prompts from 10 to 25 and set the runner merge threshold to `score >= 0.9`.
+
+### Changed
+
+- Standardized output mode names to Idea Mode, Pattern Mode, Song Sketch Mode, Ableton Handoff Mode, and Repair Mode.
+- Tightened `grid_to_notes.py` so `steps` and `grid` aliases must match when both are present.
+- Extended `composition_spec` with optional `genre_traits`, `sound_intent`, `shape_intent`, and `kick_relationship` fields.
+- Strengthened references for genre constraints, arrangement fields, melody motifs, harmony maps, and sound-design intent.
+
 ## v0.2.0 - 2026-05-03
 
 ### Added

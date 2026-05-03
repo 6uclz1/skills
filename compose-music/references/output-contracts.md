@@ -85,6 +85,9 @@ Example:
 - `role`: musical job, not a mix setting.
 - `clip_length_bars`: positive number; multiply by 4.0 for beats in 4/4.
 - `browser_query`: search query or placeholder, never a fake path.
+- `sound_intent`: role-level acoustic intent, not a preset name.
+- `shape_intent`: envelope, filter, width, motion, and transient direction for handoff.
+- `kick_relationship`: `avoid`, `double`, `answer`, or `intentional_overlap` when low-end interaction matters.
 - `notes`: Ableton note JSON objects with `pitch`, `start_time`, `duration`, `velocity`, and `mute`.
 - Optional timing fields: `timing_feel`, `swing_amount`, `shuffle_amount`, `humanization`, and `polymeter_reset_bar`.
 
@@ -125,8 +128,12 @@ Use `scripts/composition_spec_to_handoff_plan.py` to turn a valid `composition_s
 The plan separates:
 
 - `preflight_intent`: readiness checks such as wait-ready, doctor-if-needed, and tracks-list.
+- `set_tempo` and `set_meter`: deterministic transport setup intent.
 - `browser_searches`: role-based search queries for the active Ableton browser catalog.
 - `track_plan`: ordered track names and musical roles.
 - `clip_plan`: clip lengths, note source, and timing metadata.
 - `arrangement_sections`: section bars, density, active tracks, role layers, identity carrier, moves, and transition events.
 - `finish_criteria`: completion checks from the source spec.
+
+Readable schema guide: `references/ableton-handoff-plan-schema.md`.
+Machine schema: `references/ableton_handoff_plan.schema.json`.

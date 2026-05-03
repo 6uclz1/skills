@@ -5,6 +5,9 @@ Use this reference to describe sounds by role, behavior, and search intent. Do n
 ## Contract
 
 - Search query values are broad intent, such as `Drum Rack dry electronic kit` or `Operator bass`.
+- `tracks[*].sound_intent` states the acoustic role and musical behavior.
+- `tracks[*].shape_intent` states envelope, filter, width, transient, and motion guidance for Ableton execution notes.
+- `tracks[*].browser_query` stays a broad browser search phrase only.
 - Always avoid preset names, local paths, pack-specific paths, rack names presented as resolved choices, and fake URIs.
 - State what the sound must do musically before suggesting any browser query.
 - Let `$ableton-cli` browser search resolve exact paths or URIs from the active catalog.

@@ -1,0 +1,25 @@
+{
+  "bars": 1,
+  "resolution": 16,
+  "timing_feel": "UK garage swing",
+  "swing_amount": 0.58,
+  "humanization": {
+    "timing_ms": 7,
+    "velocity": 6
+  },
+  "tracks": {
+    "Kick": {
+      "pitch": 36,
+      "grid": "X.....X...X....."
+    },
+    "Snare": {
+      "pitch": 38,
+      "steps": "....X.......X..."
+    },
+    "Closed Hat": {
+      "pitch": 42,
+      "steps": "X.X.X.X.X.X.X.X.",
+      "velocity": 76
+    }
+  }
+}

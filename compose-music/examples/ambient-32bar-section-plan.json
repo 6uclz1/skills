@@ -1,0 +1,9 @@
+{
+  "length_bars": 32,
+  "sections": [
+    {"name": "Air", "start_bar": 1, "length_bars": 4, "density": 1, "foreground": [], "midground": ["Texture/FX"], "background": ["Pad"], "identity_carrier": "Texture/FX", "move": "fade in filtered room tone", "transition_event": "low shimmer pickup"},
+    {"name": "Pulse", "start_bar": 5, "length_bars": 8, "density": 2, "foreground": ["Pad"], "midground": ["Texture/FX"], "background": ["Pulse"], "identity_carrier": "Pad", "move": "add slow modal pad", "transition_event": "one-bar filter opening"},
+    {"name": "Peak Stillness", "start_bar": 13, "length_bars": 12, "density": 3, "foreground": ["Lead Fragment"], "midground": ["Pad"], "background": ["Texture/FX", "Pulse"], "identity_carrier": "Lead Fragment", "move": "introduce sparse three-note motif", "transition_event": "motif tail into subtraction"},
+    {"name": "Return", "start_bar": 25, "length_bars": 8, "density": 1, "foreground": [], "midground": ["Texture/FX"], "background": ["Pad"], "identity_carrier": "Texture/FX", "move": "remove pulse and leave reverb memory", "transition_event": "no hard ending"}
+  ]
+}

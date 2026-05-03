@@ -1,5 +1,6 @@
 import importlib.util
 import contextlib
+import csv
 import io
 import json
 import pathlib
@@ -58,6 +59,22 @@ class GridToNotesTests(unittest.TestCase):
         )
 
         self.assertEqual([note["start_time"] for note in notes], [0.0, 1.0, 2.0, 3.0])
+
+    def test_rejects_conflicting_steps_and_grid_alias(self):
+        with self.assertRaisesRegex(ValueError, "steps and .*grid must match"):
+            self.mod.grid_to_notes(
+                {
+                    "bars": 1,
+                    "resolution": 16,
+                    "tracks": {
+                        "Kick": {
+                            "pitch": 36,
+                            "steps": "X...X...X...X...",
+                            "grid": "X.......X.......",
+                        },
+                    },
+                }
+            )
 
     def test_rejects_unsupported_grid_symbols(self):
         with self.assertRaisesRegex(ValueError, "unsupported step symbol"):
@@ -227,8 +244,10 @@ class CompositionSchemaTests(unittest.TestCase):
         skill_text = (ROOT / "SKILL.md").read_text(encoding="utf-8")
 
         for phrase in (
-            "Sketch Mode",
-            "Ableton Plan Mode",
+            "Idea Mode",
+            "Pattern Mode",
+            "Song Sketch Mode",
+            "Ableton Handoff Mode",
             "Repair Mode",
             "fenced JSON block named `composition_spec`",
             "No hard-coded browser paths",
@@ -246,8 +265,22 @@ class CompositionSchemaTests(unittest.TestCase):
             ["version", "brief", "tracks", "sections", "handoff", "finish_criteria"],
         )
         self.assertIn("browser_query", schema["$defs"]["track"]["required"])
+        self.assertIn("sound_intent", schema["$defs"]["track"]["properties"])
+        self.assertIn("kick_relationship", schema["$defs"]["track"]["properties"])
         self.assertIn("identity_carrier", schema["$defs"]["section"]["properties"])
         self.assertIn("browser_queries", schema["$defs"]["handoff"]["required"])
+
+    def test_python_validator_required_fields_match_schema(self):
+        validator = load_script("validate_composition_spec")
+        schema_path = ROOT / "references" / "composition_spec.schema.json"
+        with schema_path.open("r", encoding="utf-8") as handle:
+            schema = json.load(handle)
+
+        self.assertEqual(list(validator.TOP_LEVEL_REQUIRED_FIELDS), schema["required"])
+        self.assertEqual(list(validator.REQUIRED_BRIEF_FIELDS), schema["$defs"]["brief"]["required"])
+        self.assertEqual(list(validator.REQUIRED_TRACK_FIELDS), schema["$defs"]["track"]["required"])
+        self.assertEqual(list(validator.REQUIRED_SECTION_FIELDS), schema["$defs"]["section"]["required"])
+        self.assertEqual(list(validator.REQUIRED_HANDOFF_FIELDS), schema["$defs"]["handoff"]["required"])
 
     def test_reference_files_cover_backlog_contracts(self):
         expected = {
@@ -348,6 +381,31 @@ class ValidateCompositionSpecTests(unittest.TestCase):
         self.assertIn("tracks[0].drum_rows.Kick includes unsupported step symbol '?'", result["errors"])
         self.assertIn("section lengths sum to 12, expected 8", result["errors"])
 
+    def test_rejects_missing_handoff(self):
+        spec = self.valid_spec()
+        del spec["handoff"]
+
+        result = self.mod.validate_spec(spec)
+
+        self.assertFalse(result["ok"])
+        self.assertIn("handoff is required", result["errors"])
+        self.assertIn("handoff.requires_browser_search is required", result["errors"])
+
+    def test_validates_sound_intent_and_kick_relationship_fields(self):
+        spec = self.valid_spec()
+        spec["tracks"][1]["sound_intent"] = "short mono bass with clear gaps after kick hits"
+        spec["tracks"][1]["shape_intent"] = "fast decay, low-pass movement, centered sub"
+        spec["tracks"][1]["kick_relationship"] = "answer"
+
+        result = self.mod.validate_spec(spec)
+
+        self.assertTrue(result["ok"])
+
+        spec["tracks"][1]["kick_relationship"] = "crowd"
+        result = self.mod.validate_spec(spec)
+        self.assertFalse(result["ok"])
+        self.assertTrue(any("kick_relationship" in error for error in result["errors"]))
+
     def test_rejects_unknown_section_role_tracks(self):
         spec = self.valid_spec()
         spec["sections"][0]["foreground"] = ["Lead"]
@@ -408,6 +466,7 @@ class HandoffPlanTests(unittest.TestCase):
 
         self.assertEqual(plan["preflight_intent"], ["wait-ready", "doctor-if-needed", "tracks-list"])
         self.assertEqual(plan["set_tempo"], 124)
+        self.assertEqual(plan["set_meter"], "4/4")
         self.assertEqual(plan["browser_searches"][0]["query"], "Drum Rack dry electronic kit")
         self.assertEqual(plan["track_plan"][1]["name"], "Bass")
         self.assertEqual(plan["clip_plan"][0]["length_beats"], 4.0)
@@ -421,6 +480,45 @@ class HandoffPlanTests(unittest.TestCase):
 
         with self.assertRaisesRegex(ValueError, "browser_query"):
             self.mod.build_handoff_plan(spec)
+
+
+class RepositoryFixtureTests(unittest.TestCase):
+    def setUp(self):
+        self.validator = load_script("validate_composition_spec")
+        self.handoff = load_script("composition_spec_to_handoff_plan")
+
+    def test_composition_spec_examples_validate(self):
+        for path in sorted((ROOT / "examples").glob("*.composition_spec.json")):
+            with self.subTest(path=path.name):
+                spec = json.loads(path.read_text(encoding="utf-8"))
+                result = self.validator.validate_spec(spec)
+                self.assertTrue(result["ok"], result["errors"])
+
+    def test_handoff_plan_example_matches_schema_shape(self):
+        path = ROOT / "examples" / "ableton_handoff_plan.example.json"
+        plan = json.loads(path.read_text(encoding="utf-8"))
+        expected_fields = {
+            "preflight_intent",
+            "set_tempo",
+            "set_meter",
+            "browser_searches",
+            "track_plan",
+            "clip_plan",
+            "arrangement_sections",
+            "handoff_notes",
+            "export_target",
+        }
+
+        self.assertTrue(expected_fields.issubset(plan.keys()))
+
+    def test_eval_prompt_set_has_25_cases_and_threshold(self):
+        prompts_path = ROOT.parent / "evals" / "compose-music.prompts.csv"
+        with prompts_path.open("r", encoding="utf-8") as handle:
+            prompts = list(csv.DictReader(handle))
+
+        self.assertEqual(len(prompts), 25)
+        runner_text = (ROOT.parent / "evals" / "run-compose-music-evals.mjs").read_text(encoding="utf-8")
+        self.assertIn("minScore: 0.9", runner_text)
 
 
 if __name__ == "__main__":

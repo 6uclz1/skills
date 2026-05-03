@@ -3,15 +3,36 @@
 
 import argparse
 import json
+import pathlib
 import re
 import sys
 
 
 SUPPORTED_METERS = {"4/4"}
+TOP_LEVEL_REQUIRED_FIELDS = ("version", "brief", "tracks", "sections", "handoff", "finish_criteria")
 REQUIRED_BRIEF_FIELDS = ("genre", "bpm", "meter", "key", "mode", "length_bars", "creative_constraint")
+REQUIRED_TRACK_FIELDS = ("name", "role", "clip_length_bars", "browser_query", "notes")
+REQUIRED_SECTION_FIELDS = ("name", "start_bar", "length_bars", "density", "active_tracks")
+REQUIRED_HANDOFF_FIELDS = ("requires_browser_search", "browser_queries", "export_target")
 NOTE_FIELDS = ("pitch", "start_time", "duration", "velocity", "mute")
+KICK_RELATIONSHIPS = {"avoid", "double", "answer", "intentional_overlap"}
 GRID_ACTIVE_SYMBOLS = {"x", "X", "1"}
 GRID_REST_SYMBOLS = {".", "-", "_", "0"}
+SCHEMA_PATH = pathlib.Path(__file__).resolve().parents[1] / "references" / "composition_spec.schema.json"
+
+
+def _validate_with_jsonschema(spec):
+    try:
+        import jsonschema
+    except Exception:
+        return []
+    try:
+        with SCHEMA_PATH.open("r", encoding="utf-8") as handle:
+            schema = json.load(handle)
+        validator = jsonschema.Draft202012Validator(schema)
+        return [f"schema: {error.message}" for error in sorted(validator.iter_errors(spec), key=lambda item: item.path)]
+    except Exception as exc:
+        return [f"schema validation unavailable: {exc}"]
 
 
 def _is_path_like(value):
@@ -113,11 +134,11 @@ def _validate_track_refs(values, path, track_names, errors):
 
 
 def validate_spec(spec):
-    errors = []
+    errors = _validate_with_jsonschema(spec)
     if not isinstance(spec, dict):
         return {"ok": False, "errors": ["composition_spec must be an object"]}
 
-    for field in ("version", "brief", "tracks", "sections", "handoff", "finish_criteria"):
+    for field in TOP_LEVEL_REQUIRED_FIELDS:
         if field not in spec:
             errors.append(f"{field} is required")
     if "version" in spec and spec["version"] != "1.0":
@@ -142,7 +163,7 @@ def validate_spec(spec):
         names = []
         for index, track in enumerate(tracks):
             path = f"tracks[{index}]"
-            _check_required(track, path, ("name", "role", "clip_length_bars", "browser_query", "notes"), errors)
+            _check_required(track, path, REQUIRED_TRACK_FIELDS, errors)
             if not isinstance(track, dict):
                 continue
             name = track.get("name")
@@ -160,6 +181,11 @@ def validate_spec(spec):
                 clip_length_beats = clip_length_bars * 4.0
             if "browser_query" in track and _is_path_like(track["browser_query"]):
                 errors.append(f"{path}.browser_query must be a search query or placeholder, not a path")
+            for field in ("sound_intent", "shape_intent"):
+                if field in track and not isinstance(track[field], str):
+                    errors.append(f"{path}.{field} must be a string")
+            if "kick_relationship" in track and track["kick_relationship"] not in KICK_RELATIONSHIPS:
+                errors.append(f"{path}.kick_relationship must be one of {sorted(KICK_RELATIONSHIPS)}")
             if "drum_rows" in track:
                 _validate_drum_rows(track["drum_rows"], f"{path}.drum_rows", errors)
             _validate_timing_metadata(track, path, errors)
@@ -178,7 +204,7 @@ def validate_spec(spec):
         track_names = {track.get("name") for track in tracks if isinstance(track, dict)}
         for index, section in enumerate(sections):
             path = f"sections[{index}]"
-            _check_required(section, path, ("name", "start_bar", "length_bars", "density", "active_tracks"), errors)
+            _check_required(section, path, REQUIRED_SECTION_FIELDS, errors)
             if not isinstance(section, dict):
                 continue
             if isinstance(section.get("length_bars"), int):
@@ -201,7 +227,7 @@ def validate_spec(spec):
             errors.append(f"section lengths sum to {total}, expected {brief['length_bars']}")
 
     handoff = spec.get("handoff", {})
-    _check_required(handoff, "handoff", ("requires_browser_search", "browser_queries", "export_target"), errors)
+    _check_required(handoff, "handoff", REQUIRED_HANDOFF_FIELDS, errors)
     if isinstance(handoff, dict):
         if "requires_browser_search" in handoff and not isinstance(handoff["requires_browser_search"], bool):
             errors.append("handoff.requires_browser_search must be boolean")

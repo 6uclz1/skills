@@ -70,6 +70,13 @@
         "creative_constraint": {
           "type": "string",
           "minLength": 1
+        },
+        "genre_traits": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
         }
       }
     },
@@ -93,6 +100,17 @@
         "browser_query": {
           "type": "string",
           "minLength": 1
+        },
+        "sound_intent": {
+          "type": "string",
+          "minLength": 1
+        },
+        "shape_intent": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kick_relationship": {
+          "enum": ["avoid", "double", "answer", "intentional_overlap"]
         },
         "notes": {
           "type": "array",

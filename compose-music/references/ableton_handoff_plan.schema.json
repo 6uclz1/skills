@@ -1,0 +1,117 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codex.local/compose-music/ableton_handoff_plan.schema.json",
+  "title": "compose-music ableton_handoff_plan v1",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "version",
+    "source",
+    "preflight_intent",
+    "set_tempo",
+    "set_meter",
+    "browser_searches",
+    "track_plan",
+    "clip_plan",
+    "arrangement_sections",
+    "handoff_notes",
+    "export_target"
+  ],
+  "properties": {
+    "version": {"const": "1.0"},
+    "source": {"type": "string", "minLength": 1},
+    "preflight_intent": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "set_tempo": {"type": "number", "exclusiveMinimum": 0},
+    "set_meter": {"const": "4/4"},
+    "meter": {"const": "4/4"},
+    "requires_browser_search": {"type": "boolean"},
+    "browser_searches": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/browser_search"}
+    },
+    "track_plan": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/track_plan"}
+    },
+    "clip_plan": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/clip_plan"}
+    },
+    "arrangement_sections": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/arrangement_section"}
+    },
+    "handoff_notes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "export_target": {"type": "string", "minLength": 1},
+    "finish_criteria": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1}
+    }
+  },
+  "$defs": {
+    "browser_search": {
+      "type": "object",
+      "required": ["track_index", "track_name", "role", "query"],
+      "properties": {
+        "track_index": {"type": "integer", "minimum": 0},
+        "track_name": {"type": "string", "minLength": 1},
+        "role": {"type": "string", "minLength": 1},
+        "query": {"type": "string", "minLength": 1}
+      }
+    },
+    "track_plan": {
+      "type": "object",
+      "required": ["index", "name", "role", "browser_query"],
+      "properties": {
+        "index": {"type": "integer", "minimum": 0},
+        "name": {"type": "string", "minLength": 1},
+        "role": {"type": "string", "minLength": 1},
+        "browser_query": {"type": "string", "minLength": 1},
+        "sound_intent": {"type": ["string", "null"]},
+        "shape_intent": {"type": ["string", "null"]},
+        "kick_relationship": {"type": ["string", "null"], "enum": ["avoid", "double", "answer", "intentional_overlap", null]}
+      }
+    },
+    "clip_plan": {
+      "type": "object",
+      "required": ["track_index", "track_name", "clip_slot", "clip_name", "length_bars", "length_beats", "note_source", "timing"],
+      "properties": {
+        "track_index": {"type": "integer", "minimum": 0},
+        "track_name": {"type": "string", "minLength": 1},
+        "clip_slot": {"type": "integer", "minimum": 0},
+        "clip_name": {"type": "string", "minLength": 1},
+        "length_bars": {"type": "number", "exclusiveMinimum": 0},
+        "length_beats": {"type": "number", "exclusiveMinimum": 0},
+        "note_source": {"type": "object"},
+        "timing": {"type": "object"}
+      }
+    },
+    "arrangement_section": {
+      "type": "object",
+      "required": ["name", "start_bar", "length_bars", "density", "active_tracks"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "start_bar": {"type": "integer", "minimum": 1},
+        "length_bars": {"type": "integer", "minimum": 1},
+        "density": {"type": "integer", "minimum": 0, "maximum": 5},
+        "active_tracks": {"type": "array", "items": {"type": "string"}},
+        "foreground": {"type": "array", "items": {"type": "string"}},
+        "midground": {"type": "array", "items": {"type": "string"}},
+        "background": {"type": "array", "items": {"type": "string"}},
+        "identity_carrier": {"type": ["string", "null"]},
+        "move": {"type": ["string", "null"]},
+        "transition_event": {"type": ["string", "null"]}
+      }
+    }
+  }
+}

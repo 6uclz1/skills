@@ -15,6 +15,17 @@ Use this reference when expanding loops into complete sketches. Choose the small
 
 Complete arrangements should include density, foreground, midground, background, identity carrier, add/mute/subtraction move, and transition event for each section.
 
+Treat these fields as required for complete 16-, 32-, 48-, 64-, 96-, and 128-bar song sketches, even though the machine validator keeps them optional to support narrow requests:
+
+- `foreground`: the part the listener follows.
+- `midground`: supporting harmonic, bass, or rhythmic material.
+- `background`: context, pulse, air, or texture.
+- `identity_carrier`: the single part that defines the section.
+- `move`: the add, mute, subtraction, filter, variation, or commitment move.
+- `transition_event`: fill, silence, riser, pickup, crash, automation, or deliberate non-event.
+
+Beat-light genres still use density. In ambient or drone material, density measures register, harmonic motion, texture count, and transition energy instead of drum count.
+
 ## 16-Bar Loop Expansion
 
 ```text

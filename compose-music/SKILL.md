@@ -15,8 +15,10 @@ Do not use this skill for pure Ableton command lookup, installation, transport c
 
 Choose the smallest output mode that satisfies the request:
 
-- **Sketch Mode**: for brainstorming, composition advice, pattern-only requests, and non-Ableton work. Return only the relevant human-readable sections.
-- **Ableton Plan Mode**: for "make this in Ableton", "implement", "generate clips", "MIDI JSON", or handoff requests. Return a concise human plan plus `composition_spec`.
+- **Idea Mode**: for brainstorming, options, constraints, or high-level composition advice. Return only the directly useful ideas.
+- **Pattern Mode**: for drum grids, basslines, chord loops, melody motifs, or MIDI JSON for a narrow musical unit. Return only the requested pattern material.
+- **Song Sketch Mode**: for loop-to-song expansion, arrangement plans, and complete human-readable sketches that do not need Ableton execution. Return the relevant song sections.
+- **Ableton Handoff Mode**: for "make this in Ableton", "implement", "generate clips", "MIDI JSON", or handoff requests. Return a concise human plan plus `composition_spec`.
 - **Repair Mode**: for fixing an existing loop, arrangement, bassline, melody, or chord progression. Return diagnosis, edited material, and minimal execution notes.
 
 Default assumptions when the user gives no constraints:
@@ -41,7 +43,7 @@ Follow this sequence for song sketches and Ableton handoffs:
 5. **Bassline**: reinforce the harmony while relating to or contrasting with the drum pattern.
 6. **Melody**: write a short identifiable motif, then create variations.
 7. **Structure**: expand the loop into sections using 4, 8, or 16 bar blocks.
-8. **Ableton Plan**: specify tracks, clips, note grids, scene names, and arrangement durations.
+8. **Ableton Handoff**: specify tracks, clips, note grids, scene names, and arrangement durations.
 9. **Finish**: apply subtraction, commitment, and completion prompts.
 
 ## Output Contract
@@ -55,7 +57,7 @@ For full song sketches, produce these sections:
 - **Ableton Execution Notes**: track names, clip lengths, scene names, MIDI note JSON strategy, and `$ableton-cli` handoff notes.
 - **Finish Checklist**: decisions to commit, parts to remove, renders or bounces to make, and completion criteria.
 
-For Ableton Plan Mode, always include:
+For Ableton Handoff Mode, always include:
 
 - A concise human-readable plan.
 - A fenced JSON block named `composition_spec`.
@@ -77,10 +79,15 @@ Before finalizing Ableton-ready material, verify:
 - `composition_spec.handoff.browser_queries` repeats the browser search intent and remains path-free.
 - Section plans include density, foreground/midground/background roles, add/mute moves, and transition events when arranging a complete song.
 - Narrow requests do not return unrelated full-contract sections.
+- Complete arrangements use the section fields from `references/arrangement-energy-curves.md`: `foreground`, `midground`, `background`, `identity_carrier`, `move`, and `transition_event`.
+- Melody motifs name `rhythm_cell`, `pitch_cell`, and `variation_strategy` when the user asks for melodic material.
+- Harmony maps name tension and release points with `tension_bar`, `resolution_bar`, and any `outside_notes` when those choices are present.
+- Basslines state `kick_relationship` as `avoid`, `double`, `answer`, or `intentional_overlap`.
+- Track sound choices describe `sound_intent` and `shape_intent`; `browser_query` remains a broad search phrase only.
 
 Use bundled scripts when deterministic conversion or validation is useful:
 
-- `scripts/grid_to_notes.py`: 16-step or 32-step drum grid to Ableton note JSON; use `--payload` when swing, shuffle, humanization, or polymeter metadata must survive handoff.
+- `scripts/grid_to_notes.py`: 16-step or 32-step drum grid to Ableton note JSON; each row may use `steps` or the equivalent `grid` alias. Use `--payload` when swing, shuffle, humanization, or polymeter metadata must survive handoff.
 - `scripts/chords_to_notes.py`: tonic, mode, roman numerals, explicit chord quality, borrowed chords, inversions, slash chords, and extensions to chord note JSON.
 - `scripts/validate_composition_spec.py`: validate Ableton-ready `composition_spec`.
 - `scripts/composition_spec_to_handoff_plan.py`: convert a valid `composition_spec` into `ableton_handoff_plan` JSON for `$ableton-cli` workflows.
@@ -94,6 +101,7 @@ Use bundled scripts when deterministic conversion or validation is useful:
 - Read `references/ableton-composition-bridge.md` when the output should be executable or easily translated with `$ableton-cli`.
 - Read `references/output-contracts.md` when the user asks for Ableton-ready implementation, MIDI JSON, or structured handoff.
 - Read `references/composition-spec-schema.md` when building or checking `composition_spec` fields and validation rules.
+- Read `references/ableton-handoff-plan-schema.md` when converting `composition_spec` into an intermediate `ableton_handoff_plan`.
 - Read `references/eval-cases.md` when running regression-style prompt checks.
 - Read `references/genre-playbooks.md` when selecting genre defaults or making genre-specific decisions.
 - Read `references/arrangement-energy-curves.md` when expanding loops into 32-, 64-, 96-, or 128-bar forms.

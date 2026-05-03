@@ -57,6 +57,9 @@ def build_handoff_plan(spec):
                 "name": track["name"],
                 "role": track["role"],
                 "browser_query": track["browser_query"],
+                "sound_intent": track.get("sound_intent"),
+                "shape_intent": track.get("shape_intent"),
+                "kick_relationship": track.get("kick_relationship"),
             }
         )
         clip_plan.append(
@@ -99,6 +102,7 @@ def build_handoff_plan(spec):
         "source": "compose-music composition_spec",
         "preflight_intent": ["wait-ready", "doctor-if-needed", "tracks-list"],
         "set_tempo": spec["brief"]["bpm"],
+        "set_meter": meter,
         "meter": meter,
         "requires_browser_search": spec["handoff"]["requires_browser_search"],
         "browser_searches": browser_searches,

@@ -57,6 +57,16 @@ Examples:
 
 For modal loops, avoid strong dominant resolution unless the user wants tonal pull.
 
+## Melody Motifs
+
+Describe motifs as a small contract instead of a loose sentence:
+
+- `rhythm_cell`: the repeatable rhythm, such as `eighth, eighth-rest, sixteenth pickup`.
+- `pitch_cell`: the scale degrees or named pitches that define identity.
+- `variation_strategy`: one controlled edit, such as final-note change, octave answer, rhythmic displacement, call-and-response, or subtraction.
+
+Keep the first motif short enough to repeat, then vary one property at a time.
+
 ## Voicing and Inversion
 
 Use inversions to smooth movement between chords. Choose voicing based on track role:
@@ -89,6 +99,14 @@ Am/G = A minor with G in the bass
 ```
 
 Use non-root bass notes for transitions, not as the default. If the mix is dense, prefer root and octave patterns.
+
+For harmony maps, name:
+
+- `tension_bar`: where the progression, voicing, or outside note increases pressure.
+- `resolution_bar`: where the loop lands or releases.
+- `outside_notes`: non-diatonic notes with their job, such as borrowed color, chromatic approach, or passing tone.
+
+For basslines, state `kick_relationship` as `avoid`, `double`, `answer`, or `intentional_overlap`.
 
 ## Advanced Color
 

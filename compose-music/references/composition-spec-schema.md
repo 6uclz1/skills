@@ -47,6 +47,9 @@ Optional track fields:
 
 - `drum_rows`: named step grids used as source material.
 - `timing_feel`, `swing_amount`, `shuffle_amount`, `humanization`, `polymeter_reset_bar`: timing metadata that should survive handoff.
+- `sound_intent`: the musical behavior the sound must serve, such as `short mono bass with clear gaps after kick hits`.
+- `shape_intent`: envelope, filter, width, transient, or modulation direction to carry into Ableton execution notes.
+- `kick_relationship`: one of `avoid`, `double`, `answer`, or `intentional_overlap` for bass and low percussion parts.
 - `notes_file`: generated note JSON path, only when the file is local to the current workspace and has actually been created.
 
 ## sections

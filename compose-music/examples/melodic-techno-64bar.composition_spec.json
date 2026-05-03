@@ -1,0 +1,99 @@
+{
+  "version": "1.0",
+  "brief": {
+    "genre": "melodic techno",
+    "genre_traits": ["minor/dorian harmony", "controlled percussion", "delayed motif reveal"],
+    "bpm": 124,
+    "meter": "4/4",
+    "key": "A",
+    "mode": "minor",
+    "length_bars": 64,
+    "creative_constraint": "lead motif appears only after the first drop"
+  },
+  "tracks": [
+    {
+      "name": "Drums",
+      "role": "rhythm foundation",
+      "clip_length_bars": 2,
+      "browser_query": "Drum Rack melodic techno kit",
+      "sound_intent": "steady kick and restrained hats with enough space for long chords",
+      "shape_intent": "tight kick, soft clap, hats that open only in high-density sections",
+      "notes": [
+        {"pitch": 36, "start_time": 0.0, "duration": 0.25, "velocity": 110, "mute": false},
+        {"pitch": 36, "start_time": 1.0, "duration": 0.25, "velocity": 108, "mute": false},
+        {"pitch": 36, "start_time": 2.0, "duration": 0.25, "velocity": 110, "mute": false},
+        {"pitch": 36, "start_time": 3.0, "duration": 0.25, "velocity": 108, "mute": false}
+      ]
+    },
+    {
+      "name": "Bass",
+      "role": "low-end identity",
+      "clip_length_bars": 4,
+      "browser_query": "Drift bass",
+      "sound_intent": "mono root/octave pulse that leaves kick holes",
+      "shape_intent": "medium-short decay, sidechain space, light saturation",
+      "kick_relationship": "answer",
+      "notes": [
+        {"pitch": 45, "start_time": 0.5, "duration": 0.5, "velocity": 95, "mute": false},
+        {"pitch": 52, "start_time": 1.5, "duration": 0.25, "velocity": 88, "mute": false},
+        {"pitch": 41, "start_time": 2.5, "duration": 0.5, "velocity": 94, "mute": false},
+        {"pitch": 48, "start_time": 3.5, "duration": 0.25, "velocity": 86, "mute": false}
+      ]
+    },
+    {
+      "name": "Chords",
+      "role": "harmonic color",
+      "clip_length_bars": 8,
+      "browser_query": "Wavetable pad",
+      "sound_intent": "wide but low-cut minor pad with slow emotional movement",
+      "shape_intent": "slow attack, long release, low mids controlled",
+      "notes": [
+        {"pitch": 57, "start_time": 0.0, "duration": 8.0, "velocity": 72, "mute": false},
+        {"pitch": 60, "start_time": 0.0, "duration": 8.0, "velocity": 68, "mute": false},
+        {"pitch": 64, "start_time": 0.0, "duration": 8.0, "velocity": 66, "mute": false},
+        {"pitch": 53, "start_time": 8.0, "duration": 8.0, "velocity": 70, "mute": false}
+      ]
+    },
+    {
+      "name": "Lead",
+      "role": "foreground motif",
+      "clip_length_bars": 4,
+      "browser_query": "Wavetable pluck",
+      "sound_intent": "short pluck motif with delay tail and clear final-note variation",
+      "shape_intent": "fast attack, short body, dotted delay send",
+      "notes": [
+        {"pitch": 69, "start_time": 0.0, "duration": 0.25, "velocity": 84, "mute": false},
+        {"pitch": 72, "start_time": 0.75, "duration": 0.25, "velocity": 78, "mute": false},
+        {"pitch": 71, "start_time": 1.5, "duration": 0.5, "velocity": 82, "mute": false}
+      ]
+    },
+    {
+      "name": "Texture/FX",
+      "role": "transition and background",
+      "clip_length_bars": 8,
+      "browser_query": "Atmosphere noise riser",
+      "sound_intent": "background shimmer and section transition markers",
+      "shape_intent": "filtered noise, long reverb, automated level into drops",
+      "notes": []
+    }
+  ],
+  "sections": [
+    {"name": "Intro", "start_bar": 1, "length_bars": 8, "density": 1, "active_tracks": ["Drums", "Texture/FX"], "foreground": [], "midground": ["Texture/FX"], "background": ["Drums"], "identity_carrier": "Texture/FX", "move": "establish filtered drums and shimmer", "transition_event": "open hat pickup"},
+    {"name": "Groove", "start_bar": 9, "length_bars": 8, "density": 2, "active_tracks": ["Drums", "Bass"], "foreground": ["Bass"], "midground": [], "background": ["Drums"], "identity_carrier": "Bass", "move": "add bass root/octave pulse", "transition_event": "one-beat bass mute"},
+    {"name": "Build", "start_bar": 17, "length_bars": 8, "density": 3, "active_tracks": ["Drums", "Bass", "Chords", "Texture/FX"], "foreground": ["Chords"], "midground": ["Bass"], "background": ["Drums", "Texture/FX"], "identity_carrier": "Chords", "move": "add pad progression without lead", "transition_event": "noise rise into Drop"},
+    {"name": "Drop", "start_bar": 25, "length_bars": 16, "density": 4, "active_tracks": ["Drums", "Bass", "Chords"], "foreground": ["Bass"], "midground": ["Chords"], "background": ["Drums"], "identity_carrier": "Bass", "move": "commit full groove minus lead", "transition_event": "drum fill into Break"},
+    {"name": "Break", "start_bar": 41, "length_bars": 8, "density": 1, "active_tracks": ["Chords", "Lead", "Texture/FX"], "foreground": ["Lead"], "midground": ["Chords"], "background": ["Texture/FX"], "identity_carrier": "Lead", "move": "reveal motif with drums muted", "transition_event": "reverse swell"},
+    {"name": "Drop Variation", "start_bar": 49, "length_bars": 12, "density": 5, "active_tracks": ["Drums", "Bass", "Chords", "Lead", "Texture/FX"], "foreground": ["Lead"], "midground": ["Bass", "Chords"], "background": ["Drums", "Texture/FX"], "identity_carrier": "Lead", "move": "add lead variation and open hats", "transition_event": "final lead tail"},
+    {"name": "Outro", "start_bar": 61, "length_bars": 4, "density": 1, "active_tracks": ["Drums", "Texture/FX"], "foreground": [], "midground": ["Texture/FX"], "background": ["Drums"], "identity_carrier": "Texture/FX", "move": "subtract harmony and bass", "transition_event": "dry kick ending"}
+  ],
+  "handoff": {
+    "requires_browser_search": true,
+    "browser_queries": ["Drum Rack melodic techno kit", "Drift bass", "Wavetable pad", "Wavetable pluck", "Atmosphere noise riser"],
+    "export_target": "64-bar melodic techno rough arrangement"
+  },
+  "finish_criteria": [
+    "64-bar arrangement exists",
+    "lead motif is delayed until the break and final drop",
+    "kick and bass maintain clear gaps"
+  ]
+}

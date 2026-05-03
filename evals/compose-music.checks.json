@@ -18,7 +18,7 @@
       "description": "Outputs mentioning both kick and bass must describe their relationship.",
       "type": "conditional_keywords",
       "when_all": ["kick", "bass"],
-      "any": ["composite", "gap", "sidechain", "offbeat", "duration", "register", "low-end", "low end", "mask"]
+      "any": ["composite", "gap", "sidechain", "offbeat", "duration", "register", "low-end", "low end", "mask", "avoid", "double", "answer", "intentional_overlap"]
     }
   ],
   "prompt_checks": {
@@ -62,6 +62,66 @@
     "test-10": [
       {"id": "ambient_density", "type": "all_keywords", "keywords": ["ambient", "density", "transition"]},
       {"id": "roles", "type": "all_keywords", "keywords": ["foreground", "midground", "background"]}
+    ],
+    "test-11": [
+      {"id": "melody_contract", "type": "all_keywords", "keywords": ["rhythm_cell", "pitch_cell", "variation_strategy"]},
+      {"id": "narrow_melody", "type": "forbid_full_template"}
+    ],
+    "test-12": [
+      {"id": "unsupported_meter_safe", "type": "any_keywords", "keywords": ["4/4", "unsupported", "cannot validate", "plan-only"]},
+      {"id": "no_invalid_spec_required", "type": "forbid_full_template"}
+    ],
+    "test-13": [
+      {"id": "hybrid_resolution", "type": "all_keywords", "keywords": ["drum and bass", "garage", "swing"]},
+      {"id": "drop_entry", "type": "any_keywords", "keywords": ["drop", "entry", "fill"]}
+    ],
+    "test-14": [
+      {"id": "chords_only", "type": "forbid_full_template"},
+      {"id": "roman_voicing", "type": "all_keywords", "keywords": ["roman", "voicing"]}
+    ],
+    "test-15": [
+      {"id": "defaults_genre", "type": "any_keywords", "keywords": ["assume", "default", "chosen genre"]},
+      {"id": "handoff_spec_valid", "type": "requires_composition_spec"}
+    ],
+    "test-16": [
+      {"id": "repair_missing_handoff", "type": "all_keywords", "keywords": ["handoff", "browser_queries"]},
+      {"id": "reject_path", "type": "any_keywords", "keywords": ["path", "search query", "not a path"]}
+    ],
+    "test-17": [
+      {"id": "beat_light", "type": "all_keywords", "keywords": ["ambient", "density", "texture"]},
+      {"id": "no_forced_drum_rack", "type": "absence_regex", "pattern": "Drum Rack"}
+    ],
+    "test-18": [
+      {"id": "timing_metadata", "type": "all_keywords", "keywords": ["swing_amount", "timing_feel"]},
+      {"id": "grid_alias_or_payload", "type": "any_keywords", "keywords": ["grid", "steps", "payload"]}
+    ],
+    "test-19": [
+      {"id": "polymeter_metadata", "type": "all_keywords", "keywords": ["polymeter_reset_bar", "metadata"]},
+      {"id": "safe_handoff", "type": "any_keywords", "keywords": ["search query", "browser", "path-free"]}
+    ],
+    "test-20": [
+      {"id": "acid_sound_intent", "type": "all_keywords", "keywords": ["sound_intent", "shape_intent", "acid"]},
+      {"id": "valid_spec", "type": "requires_composition_spec"}
+    ],
+    "test-21": [
+      {"id": "arrangement_96", "type": "section_sum", "expected_bars": 96},
+      {"id": "identity_roles", "type": "all_keywords", "keywords": ["identity_carrier", "density", "transition"]}
+    ],
+    "test-22": [
+      {"id": "borrowed_only", "type": "forbid_full_template"},
+      {"id": "slash_inversion", "type": "all_keywords", "keywords": ["borrowed", "slash", "inversion"]}
+    ],
+    "test-23": [
+      {"id": "kick_relationship_enum", "type": "any_keywords", "keywords": ["avoid", "double", "answer", "intentional_overlap"]},
+      {"id": "bassline_only", "type": "forbid_full_template"}
+    ],
+    "test-24": [
+      {"id": "handoff_plan_artifact", "type": "all_keywords", "keywords": ["ableton_handoff_plan", "preflight_intent", "clip_plan"]},
+      {"id": "valid_spec_present", "type": "requires_composition_spec"}
+    ],
+    "test-25": [
+      {"id": "arrangement_128", "type": "section_sum", "expected_bars": 128},
+      {"id": "section_roles", "type": "all_keywords", "keywords": ["density", "identity_carrier", "transition"]}
     ]
   }
 }

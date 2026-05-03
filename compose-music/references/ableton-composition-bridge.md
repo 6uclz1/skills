@@ -64,7 +64,7 @@ Drop Variation
 Outro
 ```
 
-When producing an Ableton plan, include each scene's duration in bars and which clips are active.
+When producing an Ableton handoff, include each scene's duration in bars and which clips are active.
 
 For Ableton handoff mode, include enough information to create clips without guessing:
 
@@ -133,7 +133,7 @@ Intro 4 | Groove 4 | Build 4 | Drop 8 | Break 4 | Drop Variation 6 | Outro 2
 
 ## Browser and Device Selection
 
-Never hard-code browser targets. In Ableton plans, instruct the executor to:
+Never hard-code browser targets. In Ableton handoffs, instruct the executor to:
 
 1. Wait until Ableton is ready.
 2. Search the active browser catalog for the needed rack, instrument, effect, or kit.

@@ -2,6 +2,50 @@
 
 Use these defaults when the user names a genre or omits one. Adapt them to the user's constraints instead of treating them as fixed templates.
 
+## Constraint Set Fields
+
+For every genre below, translate the prose into these output constraints when the request is more than a narrow pattern:
+
+- `must_have`: the few traits that make the genre recognizable.
+- `should_have`: useful supporting traits that can be dropped for constraints.
+- `avoid`: failure modes to actively prevent.
+- `default_density_curve`: the expected density motion across the requested length.
+- `typical_clip_lengths`: common loop lengths for drums, bass, harmony, lead, and texture.
+
+When emitting `composition_spec`, summarize the chosen traits in optional `brief.genre_traits`.
+
+## Alias Triggers
+
+- Drum and Bass: `DnB`, `dnb`, `drum & bass`, `jungle`.
+- Garage: `ukg`, `UKG`, `2-step`, `two-step`, `future garage`.
+- Breakbeat: `breaks`, `nu skool breaks`.
+- Acid House: `acid`, `acid techno` when the 303-style line is dominant.
+- Minimal Techno: `minimal`.
+- Electro: `electro funk`, `machine funk`.
+- Synthwave: `retrowave`.
+- Downtempo: use Ambient, Lo-fi, or Hip-Hop constraints based on drums and tempo.
+
+## Hybrid Conflict Rules
+
+- Garage drum and bass: keep DnB tempo and break/drop energy; borrow garage swing, shuffled hats, and bouncy bass phrasing.
+- Ambient techno: keep techno pulse if present, lower rhythm density, and let texture/FX carry identity.
+- Acid techno: use techno tempo and section pressure; make the acid line the hook and keep harmony sparse.
+- Breaks house: keep house tempo and harmonic warmth; use breakbeat drum identity instead of straight kick/clap as the main carrier.
+- Downtempo garage: keep garage swing and vocal/chord chop identity; lower tempo and reduce kick density.
+
+## Default Constraint Matrix
+
+| Genre | must_have | should_have | default_density_curve | typical_clip_lengths |
+| --- | --- | --- | --- | --- |
+| House | four-on-floor kick, clap/backbeat, bass gaps | seventh color, open-hat lift | 1-2-3-4-1-4-1 | drums 1-2, bass 2-4, chords 4-8 |
+| Techno | kick weight, hat motion, restrained harmony | rumble/sub answer, one identity cell | 1-2-3-4-1-4/5-1 | drums 1-2, bass 1-4, stabs 2-4 |
+| Melodic Techno | minor/dorian loop, controlled drums, delayed motif | long pad, pluck variation | 1-2-3-4-1-5-1 | drums 2, bass 4, chords 8, lead 4 |
+| Trance | driving kick, offbeat/rolling bass, long tension | suspended chords, lead reveal | 1-2-3-4-1-3-5-1 | drums 2, bass 2-4, chords 8, lead 8 |
+| Drum and Bass | 160-176 BPM, break/two-step drums, sub/reese | sparse pads, clear drop entry | 1-2-3-4-1-4-1 | drums 2-4, bass 4, atmosphere 8 |
+| Garage | swing, shuffled hats, syncopated bass | vocal chop or organ stab | 1-2-3-4-2-4-1 | drums 1-2, bass 2-4, chords 4 |
+| Hip-Hop | pocket, swing, vocal space | 808 or root bass, sample-like loop | 1-3-2-4-2-4 | drums 2-4, bass 4, sample 4-8 |
+| Ambient | texture identity, slow harmonic motion, density by register | beatless or sparse pulse | 0-1-2-3-1 | pad 8-16, texture 8-16, pulse 4-8 |
+
 ## House
 
 - Tempo: 120-126 BPM

@@ -16,7 +16,8 @@ function parseArgs(argv) {
     artifacts: DEFAULT_ARTIFACTS,
     answersDir: DEFAULT_ARTIFACTS,
     runCodex: false,
-    dryRun: false
+    dryRun: false,
+    minScore: 0.9
   };
   for (let index = 2; index < argv.length; index += 1) {
     const value = argv[index];
@@ -28,6 +29,7 @@ function parseArgs(argv) {
       args.artifacts = argv[++index];
       args.answersDir = args.artifacts;
     } else if (value === "--answers-dir") args.answersDir = argv[++index];
+    else if (value === "--min-score") args.minScore = Number(argv[++index]);
     else throw new Error(`unsupported argument: ${value}`);
   }
   return args;
@@ -176,6 +178,10 @@ function checkOutput(prompt, output, checksConfig) {
   for (const check of checksConfig.prompt_checks[prompt.id] || []) {
     if (check.type === "all_keywords") add(check.id, hasAll(output, check.keywords), `Needs all keywords: ${check.keywords.join(", ")}`);
     else if (check.type === "any_keywords") add(check.id, hasAny(output, check.keywords), `Needs one keyword: ${check.keywords.join(", ")}`);
+    else if (check.type === "absence_regex") {
+      const regex = new RegExp(check.pattern, "im");
+      add(check.id, !regex.test(output), `Must not match regex: ${check.pattern}`);
+    }
     else if (check.type === "forbid_full_template") add(check.id, !fullTemplatePresent(output), "Must not include the full template.");
     else if (check.type === "requires_composition_spec") {
       const validation = validateCompositionSpec(spec);
@@ -200,7 +206,7 @@ function main() {
   const checksConfig = JSON.parse(readFileSync(args.checks, "utf8"));
   mkdirSync(args.artifacts, { recursive: true });
   if (args.dryRun) {
-    const summary = { prompts: prompts.length, global_checks: checksConfig.global_checks.length };
+    const summary = { prompts: prompts.length, global_checks: checksConfig.global_checks.length, min_score: args.minScore };
     console.log(JSON.stringify(summary, null, 2));
     return;
   }
@@ -220,10 +226,13 @@ function main() {
     results.push(rubric);
   }
   const failed = results.filter((result) => result.failures.length > 0);
+  const belowThreshold = results.filter((result) => result.score < args.minScore);
   const summary = {
-    ok: failed.length === 0,
+    ok: failed.length === 0 && belowThreshold.length === 0,
     total: results.length,
-    failed: failed.map((result) => ({ prompt_id: result.prompt_id, failures: result.failures }))
+    min_score: args.minScore,
+    failed: failed.map((result) => ({ prompt_id: result.prompt_id, failures: result.failures })),
+    below_threshold: belowThreshold.map((result) => ({ prompt_id: result.prompt_id, score: result.score }))
   };
   writeFileSync(join(args.artifacts, "summary.json"), `${JSON.stringify(summary, null, 2)}\n`);
   console.log(JSON.stringify(summary, null, 2));

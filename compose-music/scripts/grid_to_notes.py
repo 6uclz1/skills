@@ -55,7 +55,14 @@ def grid_to_notes(grid):
         if pitch < 0 or pitch > 127:
             raise ValueError(f"{track_name}.pitch must be 0-127")
 
-        steps = _compact_steps(row.get("steps", row.get("grid", "")))
+        if "steps" in row and "grid" in row:
+            steps_value = _compact_steps(row["steps"])
+            grid_value = _compact_steps(row["grid"])
+            if steps_value != grid_value:
+                raise ValueError(f"{track_name}.steps and {track_name}.grid must match when both are provided")
+            steps = steps_value
+        else:
+            steps = _compact_steps(row.get("steps", row.get("grid", "")))
         if len(steps) != expected_steps:
             raise ValueError(f"{track_name}.steps/grid must contain {expected_steps} steps")
 

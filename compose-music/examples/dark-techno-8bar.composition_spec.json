@@ -1,0 +1,122 @@
+{
+  "version": "1.0",
+  "brief": {
+    "genre": "dark techno",
+    "genre_traits": ["techno kick weight", "minimal harmony", "modal pressure"],
+    "bpm": 132,
+    "meter": "4/4",
+    "key": "D",
+    "mode": "phrygian",
+    "length_bars": 8,
+    "creative_constraint": "one-note stab and bass rhythm carry the identity"
+  },
+  "tracks": [
+    {
+      "name": "Drums",
+      "role": "rhythm",
+      "clip_length_bars": 1,
+      "browser_query": "Drum Rack dry techno kit",
+      "sound_intent": "hard transient drum kit with short kick tail and tight hats",
+      "shape_intent": "short decay kick, restrained clap, narrow closed hats",
+      "drum_rows": {
+        "Kick": "X...X...X...X...",
+        "Closed Hat": "..X...X...X...X.",
+        "Rim": "....X.......X..."
+      },
+      "notes": [
+        {"pitch": 36, "start_time": 0.0, "duration": 0.25, "velocity": 112, "mute": false},
+        {"pitch": 36, "start_time": 1.0, "duration": 0.25, "velocity": 110, "mute": false},
+        {"pitch": 36, "start_time": 2.0, "duration": 0.25, "velocity": 112, "mute": false},
+        {"pitch": 36, "start_time": 3.0, "duration": 0.25, "velocity": 110, "mute": false}
+      ]
+    },
+    {
+      "name": "Bass",
+      "role": "low-end identity",
+      "clip_length_bars": 2,
+      "browser_query": "Operator bass",
+      "sound_intent": "short mono sub pulse that answers the kick",
+      "shape_intent": "fast decay, low-pass movement, clear silence after each hit",
+      "kick_relationship": "answer",
+      "notes": [
+        {"pitch": 38, "start_time": 0.5, "duration": 0.375, "velocity": 96, "mute": false},
+        {"pitch": 37, "start_time": 1.5, "duration": 0.25, "velocity": 90, "mute": false},
+        {"pitch": 38, "start_time": 2.5, "duration": 0.375, "velocity": 98, "mute": false},
+        {"pitch": 41, "start_time": 3.5, "duration": 0.25, "velocity": 88, "mute": false}
+      ]
+    },
+    {
+      "name": "Stab",
+      "role": "midground pressure",
+      "clip_length_bars": 2,
+      "browser_query": "Analog chord stab",
+      "sound_intent": "dry minor stab that marks the groove without full harmony",
+      "shape_intent": "short attack, medium decay, filtered upper mids",
+      "notes": [
+        {"pitch": 50, "start_time": 1.75, "duration": 0.25, "velocity": 72, "mute": false},
+        {"pitch": 53, "start_time": 1.75, "duration": 0.25, "velocity": 70, "mute": false},
+        {"pitch": 57, "start_time": 1.75, "duration": 0.25, "velocity": 68, "mute": false}
+      ]
+    },
+    {
+      "name": "Texture/FX",
+      "role": "background tension",
+      "clip_length_bars": 4,
+      "browser_query": "Noise atmosphere",
+      "sound_intent": "low metallic air that exposes section changes",
+      "shape_intent": "band-pass movement and short noise rise into bar 5",
+      "notes": []
+    }
+  ],
+  "sections": [
+    {
+      "name": "Intro",
+      "start_bar": 1,
+      "length_bars": 2,
+      "density": 1,
+      "active_tracks": ["Drums", "Texture/FX"],
+      "foreground": [],
+      "midground": ["Texture/FX"],
+      "background": ["Drums"],
+      "identity_carrier": "Texture/FX",
+      "move": "mute bass and reveal only kick plus air",
+      "transition_event": "filtered noise pickup into Groove"
+    },
+    {
+      "name": "Groove",
+      "start_bar": 3,
+      "length_bars": 2,
+      "density": 3,
+      "active_tracks": ["Drums", "Bass"],
+      "foreground": ["Bass"],
+      "midground": [],
+      "background": ["Drums"],
+      "identity_carrier": "Bass",
+      "move": "add short bass answers after kick hits",
+      "transition_event": "rim fill into Hook"
+    },
+    {
+      "name": "Hook",
+      "start_bar": 5,
+      "length_bars": 4,
+      "density": 4,
+      "active_tracks": ["Drums", "Bass", "Stab", "Texture/FX"],
+      "foreground": ["Bass"],
+      "midground": ["Stab"],
+      "background": ["Drums", "Texture/FX"],
+      "identity_carrier": "Bass",
+      "move": "add stab only on the late offbeat",
+      "transition_event": "mute stab on final half-bar for loop return"
+    }
+  ],
+  "handoff": {
+    "requires_browser_search": true,
+    "browser_queries": ["Drum Rack dry techno kit", "Operator bass", "Analog chord stab", "Noise atmosphere"],
+    "export_target": "8-bar dark techno rough loop"
+  },
+  "finish_criteria": [
+    "8-bar loop exists with section lengths summing to 8",
+    "kick and bass form one low-end composite with audible gaps",
+    "browser targets remain search queries only"
+  ]
+}

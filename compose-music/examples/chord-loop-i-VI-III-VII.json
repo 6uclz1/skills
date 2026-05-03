@@ -1,0 +1,14 @@
+{
+  "tonic": "A",
+  "mode": "minor",
+  "roman": [
+    {"roman": "i", "quality": "minor", "extensions": ["7"]},
+    {"roman": "VI", "quality": "major"},
+    {"roman": "III", "quality": "major"},
+    {"roman": "VII", "quality": "major"}
+  ],
+  "voicing": "smooth-voice-leading",
+  "octave": 3,
+  "bars_per_chord": 1,
+  "velocity": 78
+}
