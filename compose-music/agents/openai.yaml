@@ -1,4 +1,4 @@
 interface:
   display_name: "Compose Music"
-  short_description: "Design songs with rhythm, theory, and arrangement workflows."
-  default_prompt: "Use $compose-music to design a complete Ableton-ready song sketch."
+  short_description: "Compose Ableton-ready electronic song sketches, MIDI grids, harmony, basslines, melodies, and arrangements."
+  default_prompt: "Use $compose-music to design a structured Ableton-ready electronic music sketch. Include drum grids, pitch palette, harmony, bass, melody, section plan, finish checklist, and composition_spec when implementation is requested. Do not hard-code browser paths."

@@ -66,6 +66,14 @@ Outro
 
 When producing an Ableton plan, include each scene's duration in bars and which clips are active.
 
+For Ableton handoff mode, include enough information to create clips without guessing:
+
+- Track index and track name.
+- Scene or clip slot intent.
+- Clip length in bars and beats.
+- Notes inline as Ableton note JSON, or a path to a generated notes JSON file.
+- Scene names, start bars, section lengths, density, and active tracks.
+
 ## MIDI Note JSON Strategy
 
 Use beat positions. In 4/4:
@@ -94,6 +102,12 @@ Velocity defaults:
 - Lead: `80-105`
 
 Keep bass notes short around kick hits unless a sustained sub is intentional.
+
+Use bundled deterministic helpers when useful:
+
+- `scripts/grid_to_notes.py` for 16-step or 32-step drum grids.
+- `scripts/chords_to_notes.py` for roman-numeral chord progressions.
+- `scripts/validate_composition_spec.py` before executing a structured handoff.
 
 ## Arrangement Strategy
 
@@ -128,6 +142,14 @@ Never hard-code browser targets. In Ableton plans, instruct the executor to:
 
 Use placeholder names like `Drum Rack kit selected from browser search`, not fake paths.
 
+Browser handoff should name search intent, not a command sequence:
+
+- Drums: `Drum Rack`, `Kit`, or a genre-specific kit query.
+- Bass: `Operator bass`, `Drift bass`, `Analog bass`, or `808 bass`.
+- Chords: `Wavetable pad`, `Analog keys`, `Electric keys`, or `Chord stab`.
+- Lead: `Wavetable lead`, `Analog lead`, `Pluck`, or `Vocal chop`.
+- Texture/FX: `Noise`, `Atmosphere`, `Riser`, `Impact`, or `Reverb`.
+
 ## Handoff Checklist
 
 Before using `$ableton-cli`, the composition plan should include:
@@ -141,3 +163,10 @@ Before using `$ableton-cli`, the composition plan should include:
 - Arrangement target length.
 - Any browser searches required.
 - Finish criteria and export target if requested.
+
+If the plan includes `composition_spec`, validate that:
+
+- Section lengths sum to `brief.length_bars`.
+- Track names are unique and match section `active_tracks`.
+- Notes stay inside each clip length.
+- Browser queries do not look like local paths or invented browser paths.

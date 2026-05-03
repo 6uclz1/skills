@@ -1,13 +1,25 @@
 ---
 name: compose-music
-description: Design complete song sketches and Ableton-ready composition plans with rhythm, pitch palettes, chord progressions, basslines, melodies, arrangement structure, and finishing prompts. Use when Codex should help compose electronic music, generate drum patterns, write chord progressions, build bass or melody parts, turn loops into songs, or prepare musical material for implementation with ableton-cli.
+description: Compose, arrange, and prepare Ableton-ready electronic music sketches with drum grids, pitch palettes, chord progressions, basslines, melodies, section plans, MIDI note specs, and finish checklists. Use for song sketches, loop-to-song expansion, MIDI composition plans, and composition handoff to ableton-cli. Do not use for pure Ableton command lookup, installation, or mixing-only tasks.
 ---
 
 # Compose Music
 
-## Core Workflow
+## Scope
 
-Use this skill as the composition layer above `$ableton-cli`. First decide the music, then translate it into Ableton operations.
+Use this skill as the composition layer above `$ableton-cli`: decide the music first, then hand deterministic Ableton operations to `$ableton-cli`.
+
+Do not use this skill for pure Ableton command lookup, installation, transport control, browser inspection, or mixing-only advice. Use `$ableton-cli` directly for DAW operation and a mixing-focused skill or general answer for mix-only work.
+
+## Mode Selection
+
+Choose the smallest output mode that satisfies the request:
+
+- **Idea mode**: brief, palette, and 2-3 directions.
+- **Pattern mode**: drum, bass, chord, or melody grid only.
+- **Song sketch mode**: full human-readable output contract.
+- **Ableton handoff mode**: full output plus `composition_spec`.
+- **Repair mode**: diagnose an existing loop and propose edits.
 
 Default assumptions when the user gives no constraints:
 - Meter: `4/4`
@@ -15,8 +27,14 @@ Default assumptions when the user gives no constraints:
 - Tonality: `minor` or `dorian`
 - Loop target: `8 bars`
 - Arrangement target: `32` or `64 bars`
+- Genre: choose one focused electronic direction and state it.
+- Track count: 5 tracks: `Drums`, `Bass`, `Chords`, `Lead`, `Texture/FX`.
 
-Follow this sequence:
+Ask at most one clarifying question only when the missing constraint would materially change the result.
+
+## Core Workflow
+
+Follow this sequence for song sketches and Ableton handoffs:
 
 1. **Brief**: lock genre, tempo, emotional intent, key/mode, track count, and one creative constraint.
 2. **Beat**: create a 16-step or 2-bar drum grid before detailed sound design.
@@ -39,7 +57,26 @@ For full song sketches, produce these sections:
 - **Ableton Execution Notes**: track names, clip lengths, scene names, MIDI note JSON strategy, and `$ableton-cli` handoff notes.
 - **Finish Checklist**: decisions to commit, parts to remove, renders or bounces to make, and completion criteria.
 
-For narrow requests, return only the relevant sections.
+For Ableton handoff mode, also include a machine-readable `composition_spec` JSON object. Read `references/output-contracts.md` before producing it.
+
+For narrow requests, return only the relevant sections; do not emit the full song-sketch template.
+
+## Validation Rules
+
+Before finalizing Ableton-ready material, verify:
+
+- Section bar counts sum to the requested length.
+- MIDI notes use valid `pitch`, `start_time`, `duration`, `velocity`, and `mute` fields.
+- Bass and kick are designed as one composite low-end part.
+- Browser targets are search queries or placeholders, not hard-coded paths.
+- Section plans include density, foreground/midground/background roles, add/mute moves, and transition events when arranging a complete song.
+- Narrow requests do not return unrelated full-contract sections.
+
+Use bundled scripts when deterministic conversion or validation is useful:
+
+- `scripts/grid_to_notes.py`: 16-step or 32-step drum grid to Ableton note JSON.
+- `scripts/chords_to_notes.py`: tonic, mode, and roman numerals to chord note JSON.
+- `scripts/validate_composition_spec.py`: validate Ableton-ready `composition_spec`.
 
 ## Reference Selection
 
@@ -48,10 +85,23 @@ For narrow requests, return only the relevant sections.
 - Read `references/creative-strategies.md` when the user is blocked, over-editing, stuck in loops, or needs a finish plan.
 - Read `references/pattern-recipes.md` when generating concrete drum, harmony, bass, or melody patterns.
 - Read `references/ableton-composition-bridge.md` when the output should be executable or easily translated with `$ableton-cli`.
+- Read `references/output-contracts.md` when the user asks for Ableton-ready implementation, MIDI JSON, or structured handoff.
+- Read `references/genre-playbooks.md` when selecting genre defaults or making genre-specific decisions.
+- Read `references/arrangement-energy.md` when expanding loops into 32- or 64-bar forms.
+- Read `references/sound-design-palettes.md` when choosing browser search queries or role-based sound targets.
+- Read `references/quality-rubric.md` when evaluating a draft or running regression-style checks.
 
-## Ableton CLI Boundary
+## Ableton Handoff
 
-Do not duplicate the `$ableton-cli` command catalog. When asked to implement in Ableton, use this skill to decide musical content and use `$ableton-cli` for deterministic DAW operations.
+Do not duplicate the `$ableton-cli` command catalog. Hand off intent and structured data:
+
+- Preflight intent: wait-ready, doctor if needed, then tracks list.
+- Browser searches required by role, for example `Drum Rack`, `Kit`, `Operator bass`, `Drift bass`, `Wavetable pad`, `Analog keys`.
+- Track plan: default order `0 Drums`, `1 Bass`, `2 Chords`, `3 Lead`, `4 Texture/FX`.
+- Clip plan: scene clips with lengths in bars and beats.
+- Notes: inline note JSON or a path to a generated notes file.
+- Arrangement: scene names, start bars, durations, density, active tracks.
+- Finish: save/export target if requested.
 
 Always avoid hard-coding browser item paths, Drum Rack kits, or device targets. Ask `$ableton-cli` workflows to search the active Ableton browser catalog first, then use returned paths or URIs.
 

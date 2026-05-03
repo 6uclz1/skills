@@ -6,9 +6,13 @@ Use these as starting points. Convert them to the user's genre, tempo, key, and 
 
 - Drum notation
 - Drum recipes
+- Swing and shuffle
+- Breakbeat logic
 - Harmony recipes
 - Bass recipes
 - Melody recipes
+- Tension and fills
+- Polymetric loops
 - Variation moves
 
 ## Drum Notation
@@ -63,9 +67,36 @@ Two-bar variation rule:
 - Bar 2 changes one of kick, snare, hat density, or final two steps.
 - Use a short fill on steps `15-16` only when entering a new section.
 
+Four-bar variation rule:
+
+- Bars 1-2 establish the core loop.
+- Bar 3 adds one answer, ghost note, or accent.
+- Bar 4 removes one downbeat or adds a boundary fill.
+- Do not vary every drum row at once.
+
 Hat rule:
 
 - Closed and open hats should not imply impossible simultaneous playing unless the sound design intentionally layers samples.
+
+## Swing and Shuffle
+
+Use swing when the genre needs pocket:
+
+- House: light swing on hats or percussion, usually subtle.
+- Garage: stronger shuffle; push hats and ghost notes off the grid.
+- Hip-hop: swing can define the groove more than the pattern itself.
+- DnB: keep main snare anchors stable, swing ghost notes or hats.
+
+When writing a strict 16-step grid, describe swing as an execution note instead of changing step positions manually.
+
+## Breakbeat Logic
+
+For breakbeats and DnB:
+
+- Anchor snare on step `05`, `09`, or `13` depending on half-time or two-step feel.
+- Put ghost notes one or two sixteenths before or after the main snare.
+- Slice density should answer the bass; do not fill every gap.
+- Use bar-end edits on steps `13-16` for section movement.
 
 ## Harmony Recipes
 
@@ -135,6 +166,19 @@ Kick-avoid composite:
 - Reserve bass attacks for steps without kicks.
 - Use short bass durations around kick hits.
 
+Offbeat bass:
+
+- Kick on quarter notes.
+- Bass enters on `1&`, `2&`, `3&`, and `4&`.
+- Shorten note length when the groove feels heavy.
+- Works for house, trance, and some techno.
+
+Rolling bass:
+
+- Use repeated sixteenths or eighths with controlled accents.
+- Leave occasional rests before transitions.
+- Works for trance, techno, and DnB when the kick has enough transient space.
+
 ## Melody Recipes
 
 Motif:
@@ -148,6 +192,7 @@ Call and response:
 - Call in bars 1-2.
 - Response in bars 3-4.
 - Change ending note or rhythm, not everything.
+- Keep the response lower, shorter, or rhythmically displaced unless the hook needs escalation.
 
 Range expansion:
 
@@ -166,6 +211,32 @@ Variation set:
 - Same rhythm, new ending.
 - Same pitches, new rhythm.
 - Shortened version for transitions.
+
+## Tension and Fills
+
+Use tension notes by section:
+
+- Intro: avoid strong leading tones unless foreshadowing the hook.
+- Build: add suspensions, raised scale degrees, or chromatic approaches.
+- Hook: resolve to chord tones or a stable modal color.
+- Break: remove bass or root motion before reintroducing it.
+
+Fill rules:
+
+- Put fills at phrase boundaries, usually the final half-bar or final beat.
+- Prefer one clear fill over multiple competing fills.
+- If the hook returns, remove bass for one beat or mute foreground for one bar before impact.
+
+## Polymetric Loops
+
+Use asynchronous loops for motion without adding new parts:
+
+- 3-note melody cell over a 4-chord loop.
+- 5-step percussion accent over a 16-step drum grid.
+- 7-step filter or velocity pattern over 8 bars.
+- 3-bar texture loop under a 4-bar bass loop.
+
+State the reset point so the Ableton implementation can reproduce the effect.
 
 ## Variation Moves
 
