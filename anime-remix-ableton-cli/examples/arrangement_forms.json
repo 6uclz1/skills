@@ -1,0 +1,81 @@
+{
+  "anime-club": {
+    "sections": [
+      "intro",
+      "verse_chop",
+      "build",
+      "chorus_drop",
+      "breakdown",
+      "final_drop",
+      "outro"
+    ],
+    "default_bpm_range": [
+      128,
+      150
+    ],
+    "core_elements": [
+      "four_on_floor_kick",
+      "sidechain_bass",
+      "supersaw_hook",
+      "vocal_chop"
+    ],
+    "mix_focus": [
+      "kick_bass_separation",
+      "sidechain_motion",
+      "hook_width",
+      "vocal_chop_clarity"
+    ]
+  },
+  "anime-dnb": {
+    "sections": [
+      "intro",
+      "pre_drop_vocal",
+      "drop",
+      "bridge",
+      "second_drop",
+      "outro"
+    ],
+    "default_bpm_range": [
+      168,
+      178
+    ],
+    "core_elements": [
+      "breakbeat",
+      "reese_bass",
+      "vocal_chop",
+      "impact_risers"
+    ],
+    "mix_focus": [
+      "break_transient_control",
+      "sub_reese_balance",
+      "vocal_chop_timing",
+      "drop_energy_contrast"
+    ]
+  },
+  "anime-future-bass": {
+    "sections": [
+      "intro_pad",
+      "vocal_verse",
+      "build",
+      "supersaw_drop",
+      "breakdown",
+      "final_drop"
+    ],
+    "default_bpm_range": [
+      140,
+      160
+    ],
+    "core_elements": [
+      "wide_chords",
+      "pitch_vocal_chops",
+      "sub_bass",
+      "snare_build"
+    ],
+    "mix_focus": [
+      "chord_width_without_masking_vocal",
+      "sub_mono_stability",
+      "chop_pitch_consistency",
+      "drop_headroom"
+    ]
+  }
+}

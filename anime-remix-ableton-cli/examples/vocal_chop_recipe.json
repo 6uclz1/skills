@@ -1,0 +1,45 @@
+{
+  "name": "anime_private_test_chorus_chop",
+  "rights_status": "private_test",
+  "source_role": "vocal",
+  "source_section": "chorus",
+  "slice_grid": "1/8",
+  "target_key": "F minor",
+  "trigger_track": "Vocal Chop Trigger",
+  "motif": {
+    "shape": "call_response",
+    "phrase_bars": 4,
+    "variation_strategy": [
+      "repeat first two slices as hook identity",
+      "answer with transposed final syllable",
+      "leave bar 4 beat 4 open for fill or impact"
+    ]
+  },
+  "trigger_map": [
+    {
+      "pad": "C1",
+      "slice_index": 0,
+      "role": "hook_start"
+    },
+    {
+      "pad": "D1",
+      "slice_index": 2,
+      "role": "hook_answer"
+    },
+    {
+      "pad": "E1",
+      "slice_index": 4,
+      "role": "pickup"
+    },
+    {
+      "pad": "F1",
+      "slice_index": 7,
+      "role": "turnaround"
+    }
+  ],
+  "safety_notes": [
+    "Use only for private listening, practice, or cleared/original material.",
+    "Do not export for upload, streaming, sale, public DJ use, or event use.",
+    "Keep rights_status in the manifest and export filename."
+  ]
+}
