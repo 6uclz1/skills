@@ -1,0 +1,22 @@
+{
+  "sample_assets": [
+    {
+      "id": "amen_break",
+      "source": "user_sample_library",
+      "path_ref": "AMEN_BREAK_WAV",
+      "original_bpm": 136,
+      "bars": 4,
+      "trim": "downbeat_aligned",
+      "rights_status": "user_provided"
+    },
+    {
+      "id": "local_break_relative",
+      "source": "user_sample_library",
+      "root_env": "COMPOSE_MUSIC_SAMPLE_ROOT",
+      "relative_path": "breaks/amen-style-break.wav",
+      "original_bpm": 136,
+      "bars": 4,
+      "rights_status": "user_provided"
+    }
+  ]
+}

@@ -122,6 +122,30 @@
     "test-25": [
       {"id": "arrangement_128", "type": "section_sum", "expected_bars": 128},
       {"id": "section_roles", "type": "all_keywords", "keywords": ["density", "identity_carrier", "transition"]}
+    ],
+    "test-26": [
+      {"id": "amen_sample_asset", "type": "all_keywords", "keywords": ["sample_assets", "amen_break", "path_ref"]},
+      {"id": "sliced_or_audio_mode", "type": "any_keywords", "keywords": ["sliced_audio", "audio_loop"]},
+      {"id": "valid_spec_present", "type": "requires_composition_spec"}
+    ],
+    "test-27": [
+      {"id": "audio_loop_mode", "type": "all_keywords", "keywords": ["audio_loop", "audio_clip", "sample_ref"]},
+      {"id": "path_free_browser_query", "type": "all_keywords", "keywords": ["browser_query", "sample_assets"]},
+      {"id": "valid_spec_present", "type": "requires_composition_spec"}
+    ],
+    "test-28": [
+      {"id": "slice_plan", "type": "all_keywords", "keywords": ["sliced_audio", "slice_plan", "slice_count", "start_pad"]},
+      {"id": "trigger_notes", "type": "all_keywords", "keywords": ["pitch", "start_time", "duration", "velocity"]},
+      {"id": "valid_spec_present", "type": "requires_composition_spec"}
+    ],
+    "test-29": [
+      {"id": "amen_intro_drop", "type": "all_keywords", "keywords": ["Amen", "Intro", "Drop"]},
+      {"id": "arrangement_8", "type": "section_sum", "expected_bars": 8},
+      {"id": "valid_spec_present", "type": "requires_composition_spec"}
+    ],
+    "test-30": [
+      {"id": "unsafe_path_diagnosis", "type": "all_keywords", "keywords": ["browser_query", "path", "sample_assets"]},
+      {"id": "repair_is_narrow", "type": "forbid_full_template"}
     ]
   }
 }

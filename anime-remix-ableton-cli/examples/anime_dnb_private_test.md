@@ -8,6 +8,8 @@ Use this example for a private, non-public anime drum and bass remix sketch from
 - Source: `/abs/source/ending_theme_private_test.wav`
 - Vocal stem: `/abs/stems/ending_theme_vocal_private_test.wav`
 - Instrumental stem: `/abs/stems/ending_theme_instrumental_private_test.wav`
+- Source policy: preserve the full mix as the main continuous track.
+- Verified harmony: `F minor: Fm, Db, Ab, Eb` through the drop sections.
 - Target style: `anime-dnb`
 - Target BPM: `174`
 - Target key: `F minor`
@@ -29,6 +31,11 @@ uv run ableton-cli --output json remix init \
 
 uv run ableton-cli --output json audio asset add \
   --project ./ending_theme_dnb_proj/remix_project.json \
+  --role full_mix \
+  --path /abs/source/ending_theme_private_test.wav
+
+uv run ableton-cli --output json audio asset add \
+  --project ./ending_theme_dnb_proj/remix_project.json \
   --role vocal \
   --path /abs/stems/ending_theme_vocal_private_test.wav
 
@@ -36,6 +43,9 @@ uv run ableton-cli --output json audio asset add \
   --project ./ending_theme_dnb_proj/remix_project.json \
   --role instrumental \
   --path /abs/stems/ending_theme_instrumental_private_test.wav
+
+uv run ableton-cli --output json audio analyze \
+  --project ./ending_theme_dnb_proj/remix_project.json
 
 uv run ableton-cli --output json audio sections import \
   --project ./ending_theme_dnb_proj/remix_project.json \
@@ -48,7 +58,8 @@ uv run ableton-cli --output json remix set-target \
 
 uv run ableton-cli --output json remix plan \
   --project ./ending_theme_dnb_proj/remix_project.json \
-  --style anime-dnb
+  --style anime-dnb \
+  --dynamics section-profiles
 
 uv run ableton-cli --output json remix apply \
   --project ./ending_theme_dnb_proj/remix_project.json \
@@ -77,9 +88,19 @@ uv run ableton-cli --output json remix export-plan \
 
 ## Arrangement Intent
 
-- Intro: atmospheric pads, filtered breakbeat, short vocal teaser.
-- Pre-drop vocal: preserve the strongest melodic phrase before the drop.
-- Drop: breakbeat, reese or sub bass, chop response, impact on bar starts.
-- Bridge: half-time drums or pad-only reset.
-- Second drop: variation in bass rhythm and chop order, not only more layers.
-- Outro: private-practice DJ exit with drums and reduced bass.
+- intro: energy 2, drum_policy `filtered_break`; atmospheric pads, filtered breakbeat teaser, short vocal cue.
+- pre_drop_vocal: energy 2, drum_policy `off`; preserve the strongest melodic phrase before the drop, allowing only pickup or riser.
+- drop: energy 4, drum_policy `full`; breakbeat, reese or sub bass, chop response, impact on bar starts.
+- bridge: energy 1, drum_policy `off`; no added drums, use pads or source-only contrast before the second drop.
+- second_drop: energy 5, drum_policy `full_with_variation`; variation in bass rhythm and chop order, not only more layers.
+- outro: energy 2, drum_policy `reduced`; private-practice DJ exit with reduced breakbeat and bass.
+
+## Dry-run Inspection
+
+- Confirm every generated section profile has `energy`, `drum_policy`, and layer policies where applicable.
+- Confirm full mix remains one continuous source track or every edit has documented source offsets.
+- Confirm `bridge` creates no added drum clips because its `drum_policy` is `off`.
+- Confirm `drop` uses `full` drums and `second_drop` uses `full_with_variation`.
+- Confirm drop bass follows the verified Fm, Db, Ab, Eb progression.
+- Confirm each dry-run step has `section` and `role`.
+- Confirm no destructive operations are present before running `remix apply --yes`.

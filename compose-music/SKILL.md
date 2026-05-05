@@ -19,6 +19,7 @@ Choose the smallest output mode that satisfies the request:
 - **Pattern Mode**: for drum grids, basslines, chord loops, melody motifs, or MIDI JSON for a narrow musical unit. Return only the requested pattern material.
 - **Song Sketch Mode**: for loop-to-song expansion, arrangement plans, and complete human-readable sketches that do not need Ableton execution. Return the relevant song sections.
 - **Ableton Handoff Mode**: for "make this in Ableton", "implement", "generate clips", "MIDI JSON", or handoff requests. Return a concise human plan plus `composition_spec`.
+- **Sample Handoff Mode**: for user-owned audio such as Amen-style break samples. Return `sample_assets`, `audio_loop` or `sliced_audio` tracks, and keep local paths out of browser fields.
 - **Repair Mode**: for fixing an existing loop, arrangement, bassline, melody, or chord progression. Return diagnosis, edited material, and minimal execution notes.
 
 Default assumptions when the user gives no constraints:
@@ -63,6 +64,7 @@ For Ableton Handoff Mode, always include:
 - A fenced JSON block named `composition_spec`.
 - A validation checklist.
 - No hard-coded browser paths, rack names, device presets, local file paths, or fake URIs.
+- User samples referenced through `sample_assets`, never through `browser_query`.
 
 Read `references/output-contracts.md` and `references/composition-spec-schema.md`; validate against `references/composition_spec.schema.json` before producing the final handoff.
 
@@ -76,6 +78,8 @@ Before finalizing Ableton-ready material, verify:
 - MIDI notes use valid `pitch`, `start_time`, `duration`, `velocity`, and `mute` fields.
 - Bass and kick are designed as one composite low-end part.
 - Browser targets are search queries or placeholders, not hard-coded paths, rack names, device presets, local file paths, or fake URIs.
+- User-owned samples use `sample_assets` with `path_ref`, `root_env` plus `relative_path`, or a private manifest. Do not emit `/Users/...`, `file://...`, or sample filenames in `browser_query` or `handoff.browser_queries`.
+- Audio-backed tracks set `source_type` to `audio_loop` or `sliced_audio`, use `sample_ref`, and include `audio_clip` or fixed-grid `slice_plan` as appropriate.
 - `composition_spec.handoff.browser_queries` repeats the browser search intent and remains path-free.
 - Section plans include density, foreground/midground/background roles, add/mute moves, and transition events when arranging a complete song.
 - Narrow requests do not return unrelated full-contract sections.
@@ -88,8 +92,10 @@ Before finalizing Ableton-ready material, verify:
 Use bundled scripts when deterministic conversion or validation is useful:
 
 - `scripts/grid_to_notes.py`: 16-step or 32-step drum grid to Ableton note JSON; each row may use `steps` or the equivalent `grid` alias. Use `--payload` when swing, shuffle, humanization, or polymeter metadata must survive handoff.
+- `scripts/breakbeat_pattern_to_notes.py`: fixed-grid Amen/breakbeat slice index patterns to Ableton trigger note JSON.
 - `scripts/chords_to_notes.py`: tonic, mode, roman numerals, explicit chord quality, borrowed chords, inversions, slash chords, and extensions to chord note JSON.
 - `scripts/validate_composition_spec.py`: validate Ableton-ready `composition_spec`.
+- `scripts/resolve_sample_assets.py`: resolve private sample asset manifests or environment variable references outside generated specs.
 - `scripts/composition_spec_to_handoff_plan.py`: convert a valid `composition_spec` into `ableton_handoff_plan` JSON for `$ableton-cli` workflows.
 
 ## Reference Selection
@@ -116,6 +122,8 @@ Do not duplicate the `$ableton-cli` command catalog. Hand off intent and structu
 - Browser search intent by role, for example `Drum Rack`, `Kit`, `Operator bass`, `Drift bass`, `Wavetable pad`, `Analog keys`; resolve exact paths or URIs only from active `$ableton-cli` search results.
 - Track plan: default order `0 Drums`, `1 Bass`, `2 Chords`, `3 Lead`, `4 Texture/FX`.
 - Clip plan: scene clips with lengths in bars and beats.
+- Audio clip plan: user sample audio placement, warp, loop, gain, and source asset id.
+- Slice plan: fixed-grid slicing, Drum Rack trigger pad range, and trigger note source.
 - Notes: inline note JSON or a path to a generated notes file.
 - Arrangement: scene names, start bars, durations, density, active tracks.
 - Safety: prefer dry-run or plan-first execution, inspect JSON command results, and stop on non-zero `$ableton-cli` exit codes.
@@ -124,6 +132,8 @@ Do not duplicate the `$ableton-cli` command catalog. Hand off intent and structu
 When the user asks to implement a sketch, produce or use `ableton_handoff_plan` as the intermediate artifact before any DAW operation.
 
 Always avoid hard-coding browser item paths, Drum Rack kits, or device targets. Ask `$ableton-cli` workflows to search the active Ableton browser catalog first, then use returned paths or URIs.
+
+For requests like "make a 170 BPM jungle Amen break using my local sample", do not generate or bundle the Amen audio. Reference the user's sample with `sample_assets`, choose `audio_loop` for warp/loop placement or `sliced_audio` for fixed-grid Drum Rack slicing, and prefer plan/dry-run Ableton execution before modifying Live.
 
 ## Composition Rules
 

@@ -1,6 +1,7 @@
 {
   "anime-club": {
-    "sections": [
+    "section_schema_version": 2,
+    "section_names": [
       "intro",
       "verse_chop",
       "build",
@@ -8,6 +9,71 @@
       "breakdown",
       "final_drop",
       "outro"
+    ],
+    "sections": [
+      {
+        "name": "intro",
+        "default_bars": 8,
+        "energy": 2,
+        "drum_policy": "light",
+        "bass_policy": "off",
+        "instrumental_policy": "filtered_hook",
+        "notes": "DJ-safe texture setup with light groove support."
+      },
+      {
+        "name": "verse_chop",
+        "default_bars": 16,
+        "energy": 2,
+        "drum_policy": "off_or_light",
+        "bass_policy": "off",
+        "vocal_policy": "chop_source",
+        "notes": "Short call-and-response edits while keeping the verse readable."
+      },
+      {
+        "name": "build",
+        "default_bars": 16,
+        "energy": 3,
+        "drum_policy": "build_only",
+        "bass_policy": "off",
+        "transition_out": "riser_last_2_bars",
+        "notes": "Snare motion, riser, filtered instrumental, and one vocal pickup."
+      },
+      {
+        "name": "chorus_drop",
+        "default_bars": 32,
+        "energy": 4,
+        "drum_policy": "full",
+        "bass_policy": "full",
+        "vocal_policy": "chop_response",
+        "notes": "Four-on-floor kick, sidechain bass, supersaw hook, and vocal chop."
+      },
+      {
+        "name": "breakdown",
+        "default_bars": 16,
+        "energy": 1,
+        "drum_policy": "off",
+        "bass_policy": "off",
+        "instrumental_policy": "pad_or_melody",
+        "transition_out": "riser_last_2_bars",
+        "notes": "No added drums; foreground the original melody or pad texture."
+      },
+      {
+        "name": "final_drop",
+        "default_bars": 32,
+        "energy": 5,
+        "drum_policy": "full_with_variation",
+        "bass_policy": "variation",
+        "vocal_policy": "chop_variation",
+        "notes": "Full-density chorus with ad-libs, fills, or chop variation."
+      },
+      {
+        "name": "outro",
+        "default_bars": 8,
+        "energy": 2,
+        "drum_policy": "reduced",
+        "bass_policy": "reduced",
+        "notes": "Reduced drums and bass for private practice mixing."
+      }
     ],
     "default_bpm_range": [
       128,
@@ -27,13 +93,71 @@
     ]
   },
   "anime-dnb": {
-    "sections": [
+    "section_schema_version": 2,
+    "section_names": [
       "intro",
       "pre_drop_vocal",
       "drop",
       "bridge",
       "second_drop",
       "outro"
+    ],
+    "sections": [
+      {
+        "name": "intro",
+        "default_bars": 16,
+        "energy": 2,
+        "drum_policy": "filtered_break",
+        "bass_policy": "off",
+        "lead_policy": "teaser",
+        "notes": "Atmospheric pads with a filtered breakbeat teaser."
+      },
+      {
+        "name": "pre_drop_vocal",
+        "default_bars": 8,
+        "energy": 2,
+        "drum_policy": "off",
+        "bass_policy": "off",
+        "vocal_policy": "featured",
+        "transition_out": "pickup_or_riser",
+        "notes": "Preserve the strongest melodic phrase before the drop."
+      },
+      {
+        "name": "drop",
+        "default_bars": 32,
+        "energy": 4,
+        "drum_policy": "full",
+        "bass_policy": "full",
+        "vocal_policy": "chop_response",
+        "notes": "Breakbeat, reese or sub bass, chop response, and impact accents."
+      },
+      {
+        "name": "bridge",
+        "default_bars": 16,
+        "energy": 1,
+        "drum_policy": "off",
+        "bass_policy": "off",
+        "instrumental_policy": "pad_or_melody",
+        "transition_out": "riser_last_2_bars",
+        "notes": "No added drums; use pads or source-only contrast before the second drop."
+      },
+      {
+        "name": "second_drop",
+        "default_bars": 32,
+        "energy": 5,
+        "drum_policy": "full_with_variation",
+        "bass_policy": "variation",
+        "vocal_policy": "chop_variation",
+        "notes": "Variation in bass rhythm and chop order, not only more layers."
+      },
+      {
+        "name": "outro",
+        "default_bars": 8,
+        "energy": 2,
+        "drum_policy": "reduced",
+        "bass_policy": "reduced",
+        "notes": "Reduced breakbeat and bass for a private-practice DJ exit."
+      }
     ],
     "default_bpm_range": [
       168,
@@ -53,13 +177,71 @@
     ]
   },
   "anime-future-bass": {
-    "sections": [
+    "section_schema_version": 2,
+    "section_names": [
       "intro_pad",
       "vocal_verse",
       "build",
-      "supersaw_drop",
+      "chorus_drop",
       "breakdown",
       "final_drop"
+    ],
+    "sections": [
+      {
+        "name": "intro_pad",
+        "default_bars": 8,
+        "energy": 1,
+        "drum_policy": "off",
+        "bass_policy": "off",
+        "instrumental_policy": "pad_or_melody",
+        "notes": "Pad bed or source-only opening with no added drums."
+      },
+      {
+        "name": "vocal_verse",
+        "default_bars": 16,
+        "energy": 2,
+        "drum_policy": "off_or_light",
+        "bass_policy": "off",
+        "vocal_policy": "featured",
+        "notes": "Restrained groove support under the vocal phrase."
+      },
+      {
+        "name": "build",
+        "default_bars": 16,
+        "energy": 3,
+        "drum_policy": "build_only",
+        "bass_policy": "off",
+        "transition_out": "snare_roll_or_riser",
+        "notes": "Snare build and automation into the drop."
+      },
+      {
+        "name": "chorus_drop",
+        "default_bars": 32,
+        "energy": 4,
+        "drum_policy": "full",
+        "bass_policy": "full",
+        "instrumental_policy": "wide_chords",
+        "notes": "Wide chords, pitched vocal chops, sub bass, and full drums."
+      },
+      {
+        "name": "breakdown",
+        "default_bars": 16,
+        "energy": 1,
+        "drum_policy": "off",
+        "bass_policy": "off",
+        "instrumental_policy": "pad_or_vocal_tail",
+        "transition_out": "impact_tail",
+        "notes": "No added drums; reset with pads, source melody, or chop tail."
+      },
+      {
+        "name": "final_drop",
+        "default_bars": 32,
+        "energy": 5,
+        "drum_policy": "full_with_variation",
+        "bass_policy": "variation",
+        "instrumental_policy": "wide_chords_variation",
+        "notes": "Return to full drums with chord, fill, or chop variation."
+      }
     ],
     "default_bpm_range": [
       140,

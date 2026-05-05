@@ -13,6 +13,7 @@ Required top-level fields:
 
 - `version`: currently `"1.0"`.
 - `brief`: genre, BPM, meter, key, mode, length, and creative constraint.
+- `sample_assets`: optional user-provided audio assets referenced by id, never by browser query.
 - `tracks`: ordered track plan with roles, clip lengths, browser queries, and notes.
 - `sections`: arrangement sections with bar counts, density, and active tracks.
 - `handoff`: Ableton browser search intent and export target.
@@ -83,8 +84,12 @@ Example:
 
 - `name`: stable track label used in section `active_tracks`.
 - `role`: musical job, not a mix setting.
+- `source_type`: optional, defaults to `midi`; use `audio_loop` or `sliced_audio` for user sample workflows.
 - `clip_length_bars`: positive number; multiply by 4.0 for beats in 4/4.
 - `browser_query`: search query or placeholder, never a fake path.
+- `sample_ref`: sample asset id for `audio_loop` and `sliced_audio` tracks.
+- `audio_clip`: warp, loop, gain, and transpose intent for audio loop placement.
+- `slice_plan`: fixed-grid slice count, start pad, and trigger-clip intent for sliced break playback.
 - `sound_intent`: role-level acoustic intent, not a preset name.
 - `shape_intent`: envelope, filter, width, motion, and transient direction for handoff.
 - `kick_relationship`: `avoid`, `double`, `answer`, or `intentional_overlap` when low-end interaction matters.
@@ -92,6 +97,32 @@ Example:
 - Optional timing fields: `timing_feel`, `swing_amount`, `shuffle_amount`, `humanization`, and `polymeter_reset_bar`.
 
 Use `scripts/grid_to_notes.py` for drum rows and `scripts/chords_to_notes.py` for chord tracks when exact MIDI notes matter. Use `grid_to_notes.py --payload` when timing feel metadata should be preserved alongside note JSON.
+
+Use `scripts/breakbeat_pattern_to_notes.py` when a sliced break pattern should become trigger MIDI. Use `scripts/resolve_sample_assets.py` to resolve private sample paths from `path_ref`, `root_env` plus `relative_path`, or a user manifest.
+
+## Sample Asset Fields
+
+`sample_assets` is the contract for user-owned audio. It keeps private paths out of generated examples and out of Ableton browser search fields.
+
+Example:
+
+```json
+{
+  "sample_assets": [
+    {
+      "id": "amen_break",
+      "source": "user_sample_library",
+      "path_ref": "AMEN_BREAK_WAV",
+      "original_bpm": 136,
+      "bars": 4,
+      "trim": "downbeat_aligned",
+      "rights_status": "user_provided"
+    }
+  ]
+}
+```
+
+Prefer `path_ref` for one-off local files, `root_env` plus `relative_path` for a private sample library root, and a user-level manifest for reusable named assets. Never emit `/Users/...`, `file://...`, or sample file names as `browser_query`.
 
 ## Section Fields
 
@@ -132,6 +163,9 @@ The plan separates:
 - `browser_searches`: role-based search queries for the active Ableton browser catalog.
 - `track_plan`: ordered track names and musical roles.
 - `clip_plan`: clip lengths, note source, and timing metadata.
+- `audio_clip_plan`: audio clip placement, warp, loop, gain, and source asset id for `audio_loop` tracks.
+- `slice_plan`: fixed-grid slicing intent and trigger note source for `sliced_audio` tracks.
+- `sample_assets`: unresolved user asset references copied from `composition_spec`.
 - `arrangement_sections`: section bars, density, active tracks, role layers, identity carrier, moves, and transition events.
 - `finish_criteria`: completion checks from the source spec.
 

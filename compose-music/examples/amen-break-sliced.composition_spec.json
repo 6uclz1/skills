@@ -1,0 +1,86 @@
+{
+  "version": "1.0",
+  "brief": {
+    "genre": "jungle breakbeat",
+    "bpm": 170,
+    "meter": "4/4",
+    "key": "D",
+    "mode": "minor",
+    "length_bars": 8,
+    "creative_constraint": "all foreground rhythm comes from one user-provided Amen-style break sample"
+  },
+  "sample_assets": [
+    {
+      "id": "amen_break",
+      "source": "user_sample_library",
+      "path_ref": "AMEN_BREAK_WAV",
+      "original_bpm": 136,
+      "bars": 4,
+      "trim": "downbeat_aligned",
+      "rights_status": "user_provided"
+    }
+  ],
+  "tracks": [
+    {
+      "name": "Amen Slices",
+      "role": "foreground rhythm",
+      "source_type": "sliced_audio",
+      "sample_ref": "amen_break",
+      "clip_length_bars": 4,
+      "browser_query": "Drum Rack for sliced break playback",
+      "slice_plan": {
+        "mode": "fixed_grid",
+        "slice_count": 16,
+        "start_pad": 36,
+        "create_trigger_clip": true
+      },
+      "timing_feel": "jungle chopped break",
+      "swing_amount": 0.54,
+      "humanization": {
+        "timing_ms": 4,
+        "velocity": 6
+      },
+      "notes": []
+    }
+  ],
+  "sections": [
+    {
+      "name": "Intro",
+      "start_bar": 1,
+      "length_bars": 4,
+      "density": 2,
+      "active_tracks": ["Amen Slices"],
+      "foreground": ["Amen Slices"],
+      "midground": [],
+      "background": [],
+      "identity_carrier": "Amen Slices",
+      "move": "filtered sparse break",
+      "transition_event": "last-half-bar slice repeat into Drop"
+    },
+    {
+      "name": "Drop",
+      "start_bar": 5,
+      "length_bars": 4,
+      "density": 5,
+      "active_tracks": ["Amen Slices"],
+      "foreground": ["Amen Slices"],
+      "midground": [],
+      "background": [],
+      "identity_carrier": "Amen Slices",
+      "move": "full chopped break",
+      "transition_event": "mute final sixteenth for loop return"
+    }
+  ],
+  "handoff": {
+    "requires_browser_search": true,
+    "browser_queries": ["Drum Rack"],
+    "sample_asset_refs": ["amen_break"],
+    "export_target": "8-bar jungle Amen sliced rough loop"
+  },
+  "finish_criteria": [
+    "8-bar breakbeat sketch exists",
+    "Amen source is referenced through sample_assets, not browser_query",
+    "slice trigger notes stay inside the 4-bar clip",
+    "Ableton handoff can be dry-run before modifying Live"
+  ]
+}

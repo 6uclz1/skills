@@ -32,6 +32,25 @@ def _note_source(track):
     return {"type": "empty", "notes": []}
 
 
+def _sample_asset_summary(asset):
+    keep = (
+        "id",
+        "source",
+        "path_ref",
+        "root_env",
+        "relative_path",
+        "original_bpm",
+        "bars",
+        "trim",
+        "rights_status",
+    )
+    return {key: asset[key] for key in keep if key in asset}
+
+
+def _asset_by_id(spec):
+    return {asset["id"]: asset for asset in spec.get("sample_assets", [])}
+
+
 def build_handoff_plan(spec):
     validator = _load_validator()
     result = validator.validate_spec(spec)
@@ -42,42 +61,88 @@ def build_handoff_plan(spec):
     track_plan = []
     browser_searches = []
     clip_plan = []
+    audio_clip_plan = []
+    slice_plan = []
+    sample_assets = [_sample_asset_summary(asset) for asset in spec.get("sample_assets", [])]
+    assets = _asset_by_id(spec)
     for index, track in enumerate(spec["tracks"]):
-        browser_searches.append(
-            {
-                "track_index": index,
-                "track_name": track["name"],
-                "role": track["role"],
-                "query": track["browser_query"],
-            }
-        )
+        source_type = track.get("source_type", "midi")
+        if source_type != "audio_loop":
+            browser_searches.append(
+                {
+                    "track_index": index,
+                    "track_name": track["name"],
+                    "role": track["role"],
+                    "query": track["browser_query"],
+                }
+            )
         track_plan.append(
             {
                 "index": index,
                 "name": track["name"],
                 "role": track["role"],
+                "source_type": source_type,
+                "sample_ref": track.get("sample_ref"),
                 "browser_query": track["browser_query"],
                 "sound_intent": track.get("sound_intent"),
                 "shape_intent": track.get("shape_intent"),
                 "kick_relationship": track.get("kick_relationship"),
             }
         )
-        clip_plan.append(
-            {
-                "track_index": index,
-                "track_name": track["name"],
-                "clip_slot": 0,
-                "clip_name": f"{track['name']} Main",
-                "length_bars": track["clip_length_bars"],
-                "length_beats": _beats_from_bars(track["clip_length_bars"], meter),
-                "note_source": _note_source(track),
-                "timing": {
-                    key: track[key]
-                    for key in ("timing_feel", "swing_amount", "shuffle_amount", "humanization", "polymeter_reset_bar")
-                    if key in track
-                },
-            }
-        )
+        timing = {
+            key: track[key]
+            for key in ("timing_feel", "swing_amount", "shuffle_amount", "humanization", "polymeter_reset_bar")
+            if key in track
+        }
+        if source_type in ("midi", "sliced_audio"):
+            clip_plan.append(
+                {
+                    "track_index": index,
+                    "track_name": track["name"],
+                    "clip_slot": 0,
+                    "clip_name": f"{track['name']} Main",
+                    "length_bars": track["clip_length_bars"],
+                    "length_beats": _beats_from_bars(track["clip_length_bars"], meter),
+                    "note_source": _note_source(track),
+                    "timing": timing,
+                }
+            )
+        if source_type == "audio_loop":
+            audio_clip = track.get("audio_clip", {})
+            asset = assets.get(track["sample_ref"], {})
+            audio_clip_plan.append(
+                {
+                    "track_index": index,
+                    "track_name": track["name"],
+                    "source_asset_id": track["sample_ref"],
+                    "start_bar": 1,
+                    "length_bars": track["clip_length_bars"],
+                    "length_beats": _beats_from_bars(track["clip_length_bars"], meter),
+                    "warp": {
+                        "enabled": bool(audio_clip.get("warp", True)),
+                        "mode": audio_clip.get("warp_mode", "beats"),
+                        "original_bpm": asset.get("original_bpm"),
+                        "target_bpm": spec["brief"]["bpm"],
+                    },
+                    "loop": bool(audio_clip.get("loop", True)),
+                    "gain_db": audio_clip.get("gain_db"),
+                    "transpose_semitones": audio_clip.get("transpose_semitones", 0),
+                }
+            )
+        if source_type == "sliced_audio":
+            plan = track["slice_plan"]
+            slice_plan.append(
+                {
+                    "track_index": index,
+                    "track_name": track["name"],
+                    "source_asset_id": track["sample_ref"],
+                    "slice_count": plan["slice_count"],
+                    "start_pad": plan["start_pad"],
+                    "mode": plan.get("mode", "fixed_grid"),
+                    "create_trigger_clip": bool(plan.get("create_trigger_clip", False)),
+                    "trigger_note_source": _note_source(track),
+                }
+            )
 
     arrangement_sections = []
     for section in spec["sections"]:
@@ -106,8 +171,11 @@ def build_handoff_plan(spec):
         "meter": meter,
         "requires_browser_search": spec["handoff"]["requires_browser_search"],
         "browser_searches": browser_searches,
+        "sample_assets": sample_assets,
         "track_plan": track_plan,
         "clip_plan": clip_plan,
+        "audio_clip_plan": audio_clip_plan,
+        "slice_plan": slice_plan,
         "arrangement_sections": arrangement_sections,
         "export_target": spec["handoff"]["export_target"],
         "finish_criteria": spec["finish_criteria"],
@@ -115,6 +183,8 @@ def build_handoff_plan(spec):
             "Search the active Ableton browser catalog before loading devices or kits.",
             "Use returned paths or URIs from ableton-cli browser results; do not invent browser paths.",
             "Create tracks and clips from this plan, then add note_source data to clips.",
+            "Resolve sample_assets through path_ref, root_env plus relative_path, or a user manifest before any audio operation.",
+            "Prefer ableton-cli plan or dry-run execution before modifying Live.",
         ],
     }
 

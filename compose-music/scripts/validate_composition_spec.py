@@ -16,6 +16,8 @@ REQUIRED_SECTION_FIELDS = ("name", "start_bar", "length_bars", "density", "activ
 REQUIRED_HANDOFF_FIELDS = ("requires_browser_search", "browser_queries", "export_target")
 NOTE_FIELDS = ("pitch", "start_time", "duration", "velocity", "mute")
 KICK_RELATIONSHIPS = {"avoid", "double", "answer", "intentional_overlap"}
+SOURCE_TYPES = {"midi", "audio_loop", "sliced_audio"}
+WARP_MODES = {"beats", "tones", "texture", "re-pitch", "complex", "complex_pro"}
 GRID_ACTIVE_SYMBOLS = {"x", "X", "1"}
 GRID_REST_SYMBOLS = {".", "-", "_", "0"}
 SCHEMA_PATH = pathlib.Path(__file__).resolve().parents[1] / "references" / "composition_spec.schema.json"
@@ -46,6 +48,10 @@ def _is_path_like(value):
     if re.search(r"\.(adg|adv|als|wav|aif|aiff|mp3|midi?|alp)$", text, re.IGNORECASE):
         return True
     return False
+
+
+def _is_env_name(value):
+    return isinstance(value, str) and re.fullmatch(r"[A-Z_][A-Z0-9_]*", value) is not None
 
 
 def _check_required(obj, path, fields, errors):
@@ -124,6 +130,91 @@ def _validate_timing_metadata(obj, path, errors):
             errors.append(f"{path}.polymeter_reset_bar must be positive")
 
 
+def _validate_sample_assets(sample_assets, errors):
+    if sample_assets is None:
+        return {}
+    if not isinstance(sample_assets, list):
+        errors.append("sample_assets must be an array")
+        return {}
+
+    asset_ids = {}
+    for index, asset in enumerate(sample_assets):
+        path = f"sample_assets[{index}]"
+        if not isinstance(asset, dict):
+            errors.append(f"{path} must be an object")
+            continue
+        asset_id = asset.get("id")
+        if not isinstance(asset_id, str) or not asset_id:
+            errors.append(f"{path}.id is required")
+        elif asset_id in asset_ids:
+            errors.append(f"{path}.id must be unique")
+        else:
+            asset_ids[asset_id] = asset
+
+        if "path_ref" in asset and not _is_env_name(asset["path_ref"]):
+            errors.append(f"{path}.path_ref must be an environment variable name")
+        if "root_env" in asset and not _is_env_name(asset["root_env"]):
+            errors.append(f"{path}.root_env must be an environment variable name")
+        if "relative_path" in asset:
+            relative_path = asset["relative_path"]
+            if not isinstance(relative_path, str) or not relative_path:
+                errors.append(f"{path}.relative_path must be a non-empty string")
+            elif (
+                pathlib.PurePosixPath(relative_path).is_absolute()
+                or "\x00" in relative_path
+                or any(ord(char) < 32 for char in relative_path)
+                or re.match(r"^[a-z]+://", relative_path, re.IGNORECASE)
+            ):
+                errors.append(f"{path}.relative_path must be relative and URI-free")
+        for field in ("source", "trim", "rights_status"):
+            if field in asset and not isinstance(asset[field], str):
+                errors.append(f"{path}.{field} must be a string")
+        for field in ("original_bpm", "bars"):
+            if field in asset:
+                value = asset[field]
+                if not isinstance(value, (int, float)):
+                    errors.append(f"{path}.{field} must be numeric")
+                elif value <= 0:
+                    errors.append(f"{path}.{field} must be positive")
+    return asset_ids
+
+
+def _validate_audio_clip(audio_clip, path, errors):
+    if not isinstance(audio_clip, dict):
+        errors.append(f"{path} must be an object")
+        return
+    for field in ("warp", "loop"):
+        if field in audio_clip and not isinstance(audio_clip[field], bool):
+            errors.append(f"{path}.{field} must be boolean")
+    if "warp_mode" in audio_clip and audio_clip["warp_mode"] not in WARP_MODES:
+        errors.append(f"{path}.warp_mode must be one of {sorted(WARP_MODES)}")
+    for field in ("gain_db", "transpose_semitones"):
+        if field in audio_clip and not isinstance(audio_clip[field], (int, float)):
+            errors.append(f"{path}.{field} must be numeric")
+
+
+def _validate_slice_plan(slice_plan, path, errors):
+    if not isinstance(slice_plan, dict):
+        errors.append(f"{path} must be an object")
+        return
+    if slice_plan.get("mode") != "fixed_grid":
+        errors.append(f"{path}.mode must be fixed_grid")
+    slice_count = slice_plan.get("slice_count")
+    start_pad = slice_plan.get("start_pad")
+    if not isinstance(slice_count, int):
+        errors.append(f"{path}.slice_count must be an integer")
+    elif slice_count <= 0:
+        errors.append(f"{path}.slice_count must be positive")
+    if not isinstance(start_pad, int):
+        errors.append(f"{path}.start_pad must be an integer")
+    elif not 0 <= start_pad <= 127:
+        errors.append(f"{path}.start_pad must be 0-127")
+    if isinstance(slice_count, int) and isinstance(start_pad, int) and start_pad + slice_count - 1 > 127:
+        errors.append(f"{path}.slice_count must keep generated pitches in MIDI range")
+    if "create_trigger_clip" in slice_plan and not isinstance(slice_plan["create_trigger_clip"], bool):
+        errors.append(f"{path}.create_trigger_clip must be boolean")
+
+
 def _validate_track_refs(values, path, track_names, errors):
     if not isinstance(values, list):
         errors.append(f"{path} must be an array")
@@ -156,6 +247,8 @@ def validate_spec(spec):
         elif brief["length_bars"] <= 0:
             errors.append("brief.length_bars must be positive")
 
+    sample_assets = _validate_sample_assets(spec.get("sample_assets"), errors)
+
     tracks = spec.get("tracks", [])
     if not isinstance(tracks, list) or not tracks:
         errors.append("tracks must be a non-empty array")
@@ -181,6 +274,23 @@ def validate_spec(spec):
                 clip_length_beats = clip_length_bars * 4.0
             if "browser_query" in track and _is_path_like(track["browser_query"]):
                 errors.append(f"{path}.browser_query must be a search query or placeholder, not a path")
+            source_type = track.get("source_type", "midi")
+            if source_type not in SOURCE_TYPES:
+                errors.append(f"{path}.source_type must be one of {sorted(SOURCE_TYPES)}")
+                source_type = "midi"
+            if source_type in {"audio_loop", "sliced_audio"}:
+                sample_ref = track.get("sample_ref")
+                if not isinstance(sample_ref, str) or not sample_ref:
+                    errors.append(f"{path}.sample_ref is required for {source_type}")
+                elif sample_ref not in sample_assets:
+                    errors.append(f"{path}.sample_ref references unknown sample asset {sample_ref!r}")
+            if source_type == "audio_loop" and "audio_clip" in track:
+                _validate_audio_clip(track["audio_clip"], f"{path}.audio_clip", errors)
+            if source_type == "sliced_audio":
+                if "slice_plan" not in track:
+                    errors.append(f"{path}.slice_plan is required for sliced_audio")
+                else:
+                    _validate_slice_plan(track["slice_plan"], f"{path}.slice_plan", errors)
             for field in ("sound_intent", "shape_intent"):
                 if field in track and not isinstance(track[field], str):
                     errors.append(f"{path}.{field} must be a string")
@@ -242,6 +352,14 @@ def validate_spec(spec):
                     errors.append(f"handoff.browser_queries[{index}] must be a search query or placeholder, not a path")
         if "export_target" in handoff and not isinstance(handoff["export_target"], str):
             errors.append("handoff.export_target must be a string")
+        if "sample_asset_refs" in handoff:
+            refs = handoff["sample_asset_refs"]
+            if not isinstance(refs, list):
+                errors.append("handoff.sample_asset_refs must be an array")
+            else:
+                for index, asset_id in enumerate(refs):
+                    if asset_id not in sample_assets:
+                        errors.append(f"handoff.sample_asset_refs[{index}] references unknown sample asset {asset_id!r}")
 
     finish_criteria = spec.get("finish_criteria", [])
     if not isinstance(finish_criteria, list) or not finish_criteria:

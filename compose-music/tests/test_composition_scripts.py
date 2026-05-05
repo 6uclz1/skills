@@ -6,6 +6,7 @@ import json
 import pathlib
 import tempfile
 import unittest
+import unittest.mock
 
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -360,6 +361,100 @@ class ValidateCompositionSpecTests(unittest.TestCase):
             ],
         }
 
+    def amen_spec(self, source_type="sliced_audio"):
+        track = {
+            "name": "Amen Slices" if source_type == "sliced_audio" else "Amen Loop",
+            "role": "foreground rhythm",
+            "source_type": source_type,
+            "sample_ref": "amen_break",
+            "clip_length_bars": 4,
+            "browser_query": "Drum Rack for sliced break playback"
+            if source_type == "sliced_audio"
+            else "No browser search: user-provided audio sample",
+            "notes": [],
+        }
+        if source_type == "audio_loop":
+            track["audio_clip"] = {
+                "warp": True,
+                "warp_mode": "beats",
+                "loop": True,
+                "gain_db": -6.0,
+                "transpose_semitones": 0,
+            }
+        if source_type == "sliced_audio":
+            track["slice_plan"] = {
+                "mode": "fixed_grid",
+                "slice_count": 16,
+                "start_pad": 36,
+                "create_trigger_clip": True,
+            }
+            track["notes"] = [
+                {"pitch": 36, "start_time": 0.0, "duration": 0.25, "velocity": 115, "mute": False}
+            ]
+
+        return {
+            "version": "1.0",
+            "brief": {
+                "genre": "jungle breakbeat",
+                "bpm": 170,
+                "meter": "4/4",
+                "key": "D",
+                "mode": "minor",
+                "length_bars": 8,
+                "creative_constraint": "foreground rhythm comes from one user-provided Amen-style break sample",
+            },
+            "sample_assets": [
+                {
+                    "id": "amen_break",
+                    "source": "user_sample_library",
+                    "path_ref": "AMEN_BREAK_WAV",
+                    "original_bpm": 136.0,
+                    "bars": 4,
+                    "trim": "downbeat_aligned",
+                    "rights_status": "user_provided",
+                }
+            ],
+            "tracks": [track],
+            "sections": [
+                {
+                    "name": "Intro",
+                    "start_bar": 1,
+                    "length_bars": 4,
+                    "density": 2,
+                    "active_tracks": [track["name"]],
+                    "foreground": [track["name"]],
+                    "midground": [],
+                    "background": [],
+                    "identity_carrier": track["name"],
+                    "move": "filtered sparse break",
+                    "transition_event": "last-half-bar slice repeat into Drop",
+                },
+                {
+                    "name": "Drop",
+                    "start_bar": 5,
+                    "length_bars": 4,
+                    "density": 5,
+                    "active_tracks": [track["name"]],
+                    "foreground": [track["name"]],
+                    "midground": [],
+                    "background": [],
+                    "identity_carrier": track["name"],
+                    "move": "full chopped break",
+                    "transition_event": "mute final sixteenth for loop return",
+                },
+            ],
+            "handoff": {
+                "requires_browser_search": source_type == "sliced_audio",
+                "browser_queries": ["Drum Rack"] if source_type == "sliced_audio" else ["No browser search"],
+                "sample_asset_refs": ["amen_break"],
+                "export_target": "8-bar jungle Amen break rough loop",
+            },
+            "finish_criteria": [
+                "8-bar breakbeat sketch exists",
+                "Amen source is referenced through sample_assets, not browser_query",
+            ],
+        }
+
     def test_validates_complete_spec(self):
         result = self.mod.validate_spec(self.valid_spec())
 
@@ -434,6 +529,41 @@ class ValidateCompositionSpecTests(unittest.TestCase):
         self.assertFalse(result["ok"])
         self.assertIn("handoff.browser_queries[0] must be a search query or placeholder, not a path", result["errors"])
 
+    def test_accepts_user_sample_assets(self):
+        result = self.mod.validate_spec(self.amen_spec("audio_loop"))
+
+        self.assertTrue(result["ok"], result["errors"])
+
+    def test_rejects_path_like_browser_query_even_with_sample_assets(self):
+        spec = self.amen_spec("audio_loop")
+        spec["tracks"][0]["browser_query"] = "/Users/alice/Music/Samples/amen.wav"
+        spec["handoff"]["browser_queries"] = ["file:///Users/alice/Music/Samples/amen.wav"]
+
+        result = self.mod.validate_spec(spec)
+
+        self.assertFalse(result["ok"])
+        self.assertIn("tracks[0].browser_query must be a search query or placeholder, not a path", result["errors"])
+        self.assertIn("handoff.browser_queries[0] must be a search query or placeholder, not a path", result["errors"])
+
+    def test_rejects_invalid_sample_ref(self):
+        spec = self.amen_spec("audio_loop")
+        spec["tracks"][0]["sample_ref"] = "missing_break"
+
+        result = self.mod.validate_spec(spec)
+
+        self.assertFalse(result["ok"])
+        self.assertIn("tracks[0].sample_ref references unknown sample asset 'missing_break'", result["errors"])
+
+    def test_rejects_invalid_slice_plan(self):
+        spec = self.amen_spec("sliced_audio")
+        spec["tracks"][0]["slice_plan"]["slice_count"] = 200
+        spec["tracks"][0]["slice_plan"]["start_pad"] = 120
+
+        result = self.mod.validate_spec(spec)
+
+        self.assertFalse(result["ok"])
+        self.assertIn("tracks[0].slice_plan.slice_count must keep generated pitches in MIDI range", result["errors"])
+
     def test_cli_returns_nonzero_for_invalid_spec_file(self):
         spec = self.valid_spec()
         spec["tracks"][0]["notes"][0]["duration"] = 0
@@ -456,6 +586,9 @@ class HandoffPlanTests(unittest.TestCase):
 
     def valid_spec(self):
         return ValidateCompositionSpecTests().valid_spec()
+
+    def amen_spec(self, source_type="sliced_audio"):
+        return ValidateCompositionSpecTests().amen_spec(source_type)
 
     def test_builds_ableton_handoff_plan_from_valid_spec(self):
         spec = self.valid_spec()
@@ -480,6 +613,89 @@ class HandoffPlanTests(unittest.TestCase):
 
         with self.assertRaisesRegex(ValueError, "browser_query"):
             self.mod.build_handoff_plan(spec)
+
+    def test_preserves_sample_assets(self):
+        plan = self.mod.build_handoff_plan(self.amen_spec("audio_loop"))
+
+        self.assertEqual(plan["sample_assets"][0]["id"], "amen_break")
+        self.assertEqual(plan["sample_assets"][0]["path_ref"], "AMEN_BREAK_WAV")
+
+    def test_builds_audio_clip_plan_for_audio_loop(self):
+        plan = self.mod.build_handoff_plan(self.amen_spec("audio_loop"))
+
+        self.assertEqual(plan["browser_searches"], [])
+        self.assertEqual(plan["audio_clip_plan"][0]["track_name"], "Amen Loop")
+        self.assertEqual(plan["audio_clip_plan"][0]["source_asset_id"], "amen_break")
+        self.assertEqual(plan["audio_clip_plan"][0]["warp"]["mode"], "beats")
+        self.assertEqual(plan["audio_clip_plan"][0]["warp"]["target_bpm"], 170)
+        self.assertEqual(plan["audio_clip_plan"][0]["gain_db"], -6.0)
+
+    def test_builds_slice_plan_for_sliced_audio(self):
+        plan = self.mod.build_handoff_plan(self.amen_spec("sliced_audio"))
+
+        self.assertEqual(plan["browser_searches"][0]["query"], "Drum Rack for sliced break playback")
+        self.assertEqual(plan["slice_plan"][0]["track_name"], "Amen Slices")
+        self.assertEqual(plan["slice_plan"][0]["source_asset_id"], "amen_break")
+        self.assertEqual(plan["slice_plan"][0]["slice_count"], 16)
+        self.assertEqual(plan["slice_plan"][0]["trigger_note_source"]["type"], "inline")
+        self.assertEqual(plan["clip_plan"][0]["note_source"]["notes"][0]["pitch"], 36)
+
+
+class BreakbeatPatternToNotesTests(unittest.TestCase):
+    def setUp(self):
+        self.mod = load_script("breakbeat_pattern_to_notes")
+
+    def test_generates_trigger_notes_inside_clip(self):
+        notes = self.mod.breakbeat_pattern_to_notes(
+            {
+                "bars": 1,
+                "resolution": 16,
+                "start_pad": 36,
+                "slice_count": 16,
+                "pattern": [0, 1, 2, 3],
+                "velocity": [116, 92, 98, 84],
+                "duration_steps": 1,
+            }
+        )
+
+        self.assertEqual(
+            notes[:2],
+            [
+                {"pitch": 36, "start_time": 0.0, "duration": 0.25, "velocity": 116, "mute": False},
+                {"pitch": 37, "start_time": 0.25, "duration": 0.25, "velocity": 92, "mute": False},
+            ],
+        )
+        self.assertLessEqual(notes[-1]["start_time"] + notes[-1]["duration"], 4.0)
+
+    def test_rejects_slice_index_out_of_range(self):
+        with self.assertRaisesRegex(ValueError, "slice index"):
+            self.mod.breakbeat_pattern_to_notes(
+                {
+                    "bars": 1,
+                    "resolution": 16,
+                    "start_pad": 36,
+                    "slice_count": 16,
+                    "pattern": [16],
+                }
+            )
+
+
+class ResolveSampleAssetsTests(unittest.TestCase):
+    def setUp(self):
+        self.mod = load_script("resolve_sample_assets")
+
+    def test_resolves_path_ref_without_checking_file_by_default(self):
+        with unittest.mock.patch.dict("os.environ", {"AMEN_BREAK_WAV": "/tmp/amen.wav"}):
+            asset = self.mod.resolve_asset({"id": "amen_break", "path_ref": "AMEN_BREAK_WAV"})
+
+        self.assertEqual(asset["id"], "amen_break")
+        self.assertEqual(asset["absolute_path"], str(pathlib.Path("/tmp/amen.wav").resolve(strict=False)))
+
+    def test_rejects_url_and_file_uri_sources(self):
+        for value in ("https://example.com/amen.wav", "file:///tmp/amen.wav"):
+            with self.subTest(value=value):
+                with self.assertRaisesRegex(ValueError, "URI"):
+                    self.mod.resolve_asset({"id": "amen_break", "path": value})
 
 
 class RepositoryFixtureTests(unittest.TestCase):
@@ -511,12 +727,12 @@ class RepositoryFixtureTests(unittest.TestCase):
 
         self.assertTrue(expected_fields.issubset(plan.keys()))
 
-    def test_eval_prompt_set_has_25_cases_and_threshold(self):
+    def test_eval_prompt_set_has_30_cases_and_threshold(self):
         prompts_path = ROOT.parent / "evals" / "compose-music.prompts.csv"
         with prompts_path.open("r", encoding="utf-8") as handle:
             prompts = list(csv.DictReader(handle))
 
-        self.assertEqual(len(prompts), 25)
+        self.assertEqual(len(prompts), 30)
         runner_text = (ROOT.parent / "evals" / "run-compose-music-evals.mjs").read_text(encoding="utf-8")
         self.assertIn("minScore: 0.9", runner_text)
 

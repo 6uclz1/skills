@@ -24,3 +24,8 @@ test-22,"Give only borrowed chord options for A minor, including slash or invers
 test-23,"Create a bassline and state whether it avoids, doubles, answers, or intentionally overlaps the kick.",pattern,,true,false
 test-24,"Convert a validated melodic techno composition_spec into an ableton_handoff_plan artifact.",ableton_handoff,,false,true
 test-25,"Make a 128-bar progressive house arrangement with density, identity carriers, and transitions.",song_sketch,128,false,false
+test-26,"Use $compose-music to create a 170 BPM jungle Amen break using my local sample asset amen_break.",ableton_handoff,8,false,true
+test-27,"Use $compose-music to make an Amen break audio-loop handoff without putting local paths in browser_query.",ableton_handoff,8,false,true
+test-28,"Use $compose-music to slice a user-provided Amen WAV into 16 pads and generate trigger MIDI JSON.",ableton_handoff,8,false,true
+test-29,"Use $compose-music to expand a 4-bar Amen break into an 8-bar intro/drop sketch.",song_sketch,8,false,true
+test-30,"Use $compose-music to diagnose why an Amen break handoff is unsafe because it hard-coded a local file path in browser_query.",repair,,true,false

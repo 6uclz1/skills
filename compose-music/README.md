@@ -8,6 +8,7 @@
 - Pattern generation for drum grids, basslines, chord loops, and melody motifs.
 - Loop-to-song arrangement using density, foreground/midground/background roles, moves, and transitions.
 - Ableton handoff through validated `composition_spec` and generated `ableton_handoff_plan` JSON.
+- User-provided sample workflows for audio loops and fixed-grid sliced break playback without embedding private paths.
 
 ## When To Use
 
@@ -19,6 +20,7 @@ Good requests include:
 - "Turn this drum grid into MIDI note JSON."
 - "Expand this 4-bar loop into a 64-bar arrangement."
 - "Create a melodic techno `composition_spec`."
+- "Make a 170 BPM jungle Amen break using my local sample asset."
 - "Diagnose why my kick and bass feel crowded."
 
 ## When Not To Use
@@ -41,6 +43,7 @@ See `examples/dark-techno-8bar.composition_spec.json` for a complete minimal spe
 
 - `version`
 - `brief`
+- `sample_assets` when user-owned audio is referenced
 - `tracks`
 - `sections`
 - `handoff`
@@ -70,6 +73,18 @@ Convert a roman-numeral chord loop to note JSON:
 
 ```bash
 python3 compose-music/scripts/chords_to_notes.py compose-music/examples/chord-loop-i-VI-III-VII.json --pretty
+```
+
+Convert an Amen slice trigger grid to note JSON:
+
+```bash
+python3 compose-music/scripts/breakbeat_pattern_to_notes.py compose-music/examples/amen-break-trigger-grid.json --pretty
+```
+
+Resolve a private sample asset from a user manifest:
+
+```bash
+AMEN_BREAK_WAV=/tmp/amen.wav python3 compose-music/scripts/resolve_sample_assets.py --manifest compose-music/examples/sample_assets.example.json --asset-id amen_break --pretty
 ```
 
 Rows in grid files may use either `steps` or the equivalent `grid` alias. If both are present, the values must match.
@@ -105,5 +120,7 @@ The merge threshold is `score >= 0.9` for every prompt plus no failed structural
 ## Safe Ableton Handoff Policy
 
 `composition_spec` and `ableton_handoff_plan` contain musical intent and structured data only. Browser targets must be broad search queries such as `Drum Rack dry electronic kit` or `Operator bass`; exact paths, URIs, racks, kits, presets, and local files must come from active `$ableton-cli` browser search results.
+
+For user-owned audio, use `sample_assets` with `path_ref`, `root_env` plus `relative_path`, or a private manifest. Do not put `/Users/...`, `file://...`, or sample filenames into `browser_query` or `handoff.browser_queries`.
 
 The handoff plan is an intermediate artifact. It does not operate on Ableton Live directly.
