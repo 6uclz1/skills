@@ -37,6 +37,10 @@
       "type": "array",
       "items": {"type": "object"}
     },
+    "audio_asset_plan": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/audio_asset_plan"}
+    },
     "track_plan": {
       "type": "array",
       "minItems": 1,
@@ -53,6 +57,18 @@
     "slice_plan": {
       "type": "array",
       "items": {"$ref": "#/$defs/slice_plan"}
+    },
+    "cutup_trigger_plan": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/cutup_trigger_plan"}
+    },
+    "cut_to_drum_rack_requests": {
+      "type": "array",
+      "items": {"type": "object"}
+    },
+    "execution_warnings": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1}
     },
     "arrangement_sections": {
       "type": "array",
@@ -89,6 +105,7 @@
         "role": {"type": "string", "minLength": 1},
         "source_type": {"enum": ["midi", "audio_loop", "sliced_audio"]},
         "sample_ref": {"type": ["string", "null"]},
+        "source_material": {"type": ["object", "null"]},
         "browser_query": {"type": "string", "minLength": 1},
         "sound_intent": {"type": ["string", "null"]},
         "shape_intent": {"type": ["string", "null"]},
@@ -111,18 +128,65 @@
         "transpose_semitones": {"type": "number"}
       }
     },
-    "slice_plan": {
+    "audio_asset_plan": {
       "type": "object",
-      "required": ["track_index", "track_name", "source_asset_id", "slice_count", "start_pad", "trigger_note_source"],
+      "required": ["track", "role", "kind", "rights_status", "validation"],
       "properties": {
-        "track_index": {"type": "integer", "minimum": 0},
-        "track_name": {"type": "string", "minLength": 1},
-        "source_asset_id": {"type": "string", "minLength": 1},
-        "slice_count": {"type": "integer", "minimum": 1},
-        "start_pad": {"type": "integer", "minimum": 0, "maximum": 127},
-        "mode": {"const": "fixed_grid"},
-        "create_trigger_clip": {"type": "boolean"},
-        "trigger_note_source": {"type": "object"}
+        "track": {"type": "string", "minLength": 1},
+        "role": {"type": ["string", "null"]},
+        "kind": {"type": ["string", "null"]},
+        "path": {"type": ["string", "null"]},
+        "rights_status": {"enum": ["original", "cleared", "royalty_free", "private_test", "unknown", null]},
+        "source_bpm": {"type": ["number", "null"]},
+        "source_key": {"type": ["string", "null"]},
+        "validation": {"type": "array", "items": {"type": "string", "minLength": 1}}
+      }
+    },
+    "slice_plan": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["track_index", "track_name", "source_asset_id", "slice_count", "start_pad", "trigger_note_source"],
+          "properties": {
+            "track_index": {"type": "integer", "minimum": 0},
+            "track_name": {"type": "string", "minLength": 1},
+            "source_asset_id": {"type": "string", "minLength": 1},
+            "slice_count": {"type": "integer", "minimum": 1, "maximum": 128},
+            "start_pad": {"type": "integer", "minimum": 0, "maximum": 127},
+            "mode": {"const": "fixed_grid"},
+            "create_trigger_clip": {"type": "boolean"},
+            "trigger_note_source": {"type": "object"}
+          }
+        },
+        {
+          "type": "object",
+          "required": ["track_index", "track_name", "target_track", "source_file", "method", "max_slices", "start_pad_midi"],
+          "properties": {
+            "track_index": {"type": "integer", "minimum": 0},
+            "track_name": {"type": "string", "minLength": 1},
+            "target_track": {"type": "string", "minLength": 1},
+            "source_file": {"type": ["string", "null"]},
+            "method": {"enum": ["transient", "beat", "region", "manual", "slice_count"]},
+            "max_slices": {"type": "integer", "minimum": 1, "maximum": 128},
+            "start_pad_midi": {"type": "integer", "minimum": 0, "maximum": 127},
+            "create_trigger_clip": {"type": "boolean"},
+            "trigger_clip_slot": {"type": "integer", "minimum": 0},
+            "warp_mode": {"type": ["string", "null"]},
+            "preserve_timing": {"type": ["boolean", "null"]}
+          }
+        }
+      ]
+    },
+    "cutup_trigger_plan": {
+      "type": "object",
+      "required": ["track", "clip_slot", "length_beats", "notes_source", "notes"],
+      "properties": {
+        "track": {"type": "string", "minLength": 1},
+        "clip_slot": {"type": "integer", "minimum": 0},
+        "length_beats": {"type": "number", "exclusiveMinimum": 0},
+        "notes_source": {"enum": ["inline", "file", "empty"]},
+        "notes": {"type": "array", "items": {"type": "object"}},
+        "cutup_pattern": {"type": "object"}
       }
     },
     "clip_plan": {

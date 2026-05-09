@@ -47,6 +47,30 @@ def _sample_asset_summary(asset):
     return {key: asset[key] for key in keep if key in asset}
 
 
+def _source_material_summary(track):
+    source_material = track.get("source_material")
+    if not isinstance(source_material, dict):
+        return None
+    return {
+        "track": track["name"],
+        "role": source_material.get("role"),
+        "kind": source_material.get("kind"),
+        "path": source_material.get("path"),
+        "rights_status": source_material.get("rights_status"),
+        "source_bpm": source_material.get("source_bpm"),
+        "source_key": source_material.get("source_key"),
+        "validation": [
+            "path must exist before execution",
+            "wav/aiff preferred for transient slicing",
+            "rights_status must allow the requested export target",
+        ],
+    }
+
+
+def _is_cutup_slice_plan(plan):
+    return isinstance(plan, dict) and ("method" in plan or "max_slices" in plan or "start_pad_midi" in plan)
+
+
 def _asset_by_id(spec):
     return {asset["id"]: asset for asset in spec.get("sample_assets", [])}
 
@@ -62,8 +86,12 @@ def build_handoff_plan(spec):
     browser_searches = []
     clip_plan = []
     audio_clip_plan = []
+    audio_asset_plan = []
     slice_plan = []
+    cutup_trigger_plan = []
     sample_assets = [_sample_asset_summary(asset) for asset in spec.get("sample_assets", [])]
+    cut_to_drum_rack_requests = spec.get("handoff", {}).get("cut_to_drum_rack_requests", [])
+    execution_warnings = list(result.get("warnings", []))
     assets = _asset_by_id(spec)
     for index, track in enumerate(spec["tracks"]):
         source_type = track.get("source_type", "midi")
@@ -76,6 +104,13 @@ def build_handoff_plan(spec):
                     "query": track["browser_query"],
                 }
             )
+        source_material = _source_material_summary(track)
+        if source_material:
+            audio_asset_plan.append(source_material)
+            if source_material.get("rights_status") == "unknown":
+                execution_warnings.append(
+                    f"{track['name']} has unknown rights_status; keep output private until rights are resolved."
+                )
         track_plan.append(
             {
                 "index": index,
@@ -83,6 +118,7 @@ def build_handoff_plan(spec):
                 "role": track["role"],
                 "source_type": source_type,
                 "sample_ref": track.get("sample_ref"),
+                "source_material": track.get("source_material"),
                 "browser_query": track["browser_query"],
                 "sound_intent": track.get("sound_intent"),
                 "shape_intent": track.get("shape_intent"),
@@ -131,18 +167,46 @@ def build_handoff_plan(spec):
             )
         if source_type == "sliced_audio":
             plan = track["slice_plan"]
-            slice_plan.append(
-                {
-                    "track_index": index,
-                    "track_name": track["name"],
-                    "source_asset_id": track["sample_ref"],
-                    "slice_count": plan["slice_count"],
-                    "start_pad": plan["start_pad"],
-                    "mode": plan.get("mode", "fixed_grid"),
-                    "create_trigger_clip": bool(plan.get("create_trigger_clip", False)),
-                    "trigger_note_source": _note_source(track),
-                }
-            )
+            if _is_cutup_slice_plan(plan):
+                slice_plan.append(
+                    {
+                        "track_index": index,
+                        "track_name": track["name"],
+                        "target_track": track["name"],
+                        "source_file": track.get("source_material", {}).get("path"),
+                        "method": plan["method"],
+                        "max_slices": plan["max_slices"],
+                        "start_pad_midi": plan["start_pad_midi"],
+                        "create_trigger_clip": bool(plan.get("create_trigger_clip", False)),
+                        "trigger_clip_slot": plan.get("trigger_clip_slot", 0),
+                        "warp_mode": plan.get("warp_mode"),
+                        "preserve_timing": plan.get("preserve_timing"),
+                    }
+                )
+            else:
+                slice_plan.append(
+                    {
+                        "track_index": index,
+                        "track_name": track["name"],
+                        "source_asset_id": track["sample_ref"],
+                        "slice_count": plan["slice_count"],
+                        "start_pad": plan["start_pad"],
+                        "mode": plan.get("mode", "fixed_grid"),
+                        "create_trigger_clip": bool(plan.get("create_trigger_clip", False)),
+                        "trigger_note_source": _note_source(track),
+                    }
+                )
+            if "cutup_pattern" in track:
+                cutup_trigger_plan.append(
+                    {
+                        "track": track["name"],
+                        "clip_slot": plan.get("trigger_clip_slot", 0),
+                        "length_beats": _beats_from_bars(track["clip_length_bars"], meter),
+                        "notes_source": _note_source(track)["type"],
+                        "notes": track.get("notes", []),
+                        "cutup_pattern": track["cutup_pattern"],
+                    }
+                )
 
     arrangement_sections = []
     for section in spec["sections"]:
@@ -172,13 +236,17 @@ def build_handoff_plan(spec):
         "requires_browser_search": spec["handoff"]["requires_browser_search"],
         "browser_searches": browser_searches,
         "sample_assets": sample_assets,
+        "audio_asset_plan": audio_asset_plan,
         "track_plan": track_plan,
         "clip_plan": clip_plan,
         "audio_clip_plan": audio_clip_plan,
         "slice_plan": slice_plan,
+        "cutup_trigger_plan": cutup_trigger_plan,
+        "cut_to_drum_rack_requests": cut_to_drum_rack_requests,
         "arrangement_sections": arrangement_sections,
         "export_target": spec["handoff"]["export_target"],
         "finish_criteria": spec["finish_criteria"],
+        "execution_warnings": execution_warnings,
         "handoff_notes": [
             "Search the active Ableton browser catalog before loading devices or kits.",
             "Use returned paths or URIs from ableton-cli browser results; do not invent browser paths.",

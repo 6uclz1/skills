@@ -41,6 +41,8 @@ Pass threshold: `score >= 0.9` and no structural validation errors.
 | E23 | Kick/bass relationship enum. | Uses `avoid`, `double`, `answer`, or `intentional_overlap` explicitly. |
 | E24 | Convert spec to handoff plan. | Uses `ableton_handoff_plan` as intermediate artifact with preflight, browser searches, track plan, and clip plan. |
 | E25 | 128-bar progressive house. | Section lengths sum to 128; identity carriers and transitions are present. |
+| E26 | Make a 32-bar cut-up garage sketch from a vocal sample in Ableton. | Cut-up Ableton Handoff Mode; source material placeholder; `rights_status`; `slice_plan`; `cutup_pattern`; stable drum grid; bass/kick relationship; no invented local file path or Ableton URI; sections sum to 32 bars. |
+| E27 | Create only a 2-bar vocal chop pattern. | Cut-up Pattern Mode only; no full song template; slice trigger notes or slice grid; silence and variation rule; kick/sample collision note. |
 
 ## Failure Signals
 

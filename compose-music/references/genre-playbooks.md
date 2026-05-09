@@ -32,6 +32,7 @@ When emitting `composition_spec`, summarize the chosen traits in optional `brief
 - Acid techno: use techno tempo and section pressure; make the acid line the hook and keep harmony sparse.
 - Breaks house: keep house tempo and harmonic warmth; use breakbeat drum identity instead of straight kick/clap as the main carrier.
 - Downtempo garage: keep garage swing and vocal/chord chop identity; lower tempo and reduce kick density.
+- Cut-up garage: keep the garage drum swing and bass bounce; make the sliced sample the identity carrier and leave one-beat dropouts before hook returns.
 
 ## Default Constraint Matrix
 
@@ -45,6 +46,7 @@ When emitting `composition_spec`, summarize the chosen traits in optional `brief
 | Garage | swing, shuffled hats, syncopated bass | vocal chop or organ stab | 1-2-3-4-2-4-1 | drums 1-2, bass 2-4, chords 4 |
 | Hip-Hop | pocket, swing, vocal space | 808 or root bass, sample-like loop | 1-3-2-4-2-4 | drums 2-4, bass 4, sample 4-8 |
 | Ambient | texture identity, slow harmonic motion, density by register | beatless or sparse pulse | 0-1-2-3-1 | pad 8-16, texture 8-16, pulse 4-8 |
+| Cut-up / Sample Chop | recognizable slice motif, stable pulse, negative space | 8-16 primary slices, stutter at boundaries | 1-2-3-4-2-5-1 | drums 1-2, cutup 1-2, bass 2-4 |
 
 ## House
 
@@ -189,6 +191,52 @@ When emitting `composition_spec`, summarize the chosen traits in optional `brief
 - Melody: chopped vocal, bell motif, or fragile pluck with space
 - Arrangement: texture-led builds, vocal fragment reveals, and sparse drops
 - Avoid: overly bright EDM leads or perfectly straight quantization
+
+## Cut-up / Sample Chop
+
+- Alias triggers: `cut-up`, `cutup`, `sample chop`, `vocal chop`, `chopped sample`, `glitch collage`, `break edit`
+- Tempo: 90-100 BPM for hip-hop or lo-fi cut-up, 125-140 BPM for breakbeat/garage/club cut-up, 160-176 BPM for jungle/DnB cut-up
+- Meter: 4/4
+- Must have: recognizable slice motif, stable drum or pulse anchor, clear negative space, one source-identity reveal, one heavily resequenced section
+- Should have: 8-16 primary slices, 1-bar identity phrase, 2-bar variation, boundary stutter/repeat, pitch/gate/filter/reverse/delay-throw variation
+- Bass: answer the kick and sample gaps; avoid low-mid masking under the sample body
+- Arrangement: reveal the source, resequence it, then alternate dense edits with silence or simplified motifs
+- Avoid: uncontrolled randomization, too many unrelated samples, continuous slicing without a motif, hard-coded local sample paths, or fake Ableton browser URIs
+
+## Vocal Chop
+
+- Tempo: follows the target genre; 128-138 BPM for garage or future garage, 160-176 BPM for DnB
+- Must have: vowel/consonant identity, short gated motifs, silence before hook returns
+- Should have: 3-5 slice motif, one pitch-up response slice, delay throws only at phrase boundaries
+- Avoid: full lyric phrases when rights or source intent are unclear
+
+## Glitch Cut-up
+
+- Tempo: 90-150 BPM depending on feel
+- Must have: one stable anchor under the edits, controlled repeat/stutter grammar, resets after surprise events
+- Should have: 1/32 repeats, reverses at boundaries, occasional triplet fragments
+- Avoid: edits that sound random before a motif is established
+
+## Break Cut-up
+
+- Tempo: 125-140 BPM for breaks, 160-176 BPM for jungle/DnB
+- Must have: break transient identity, strong snare anchor, bar-end rearrangement
+- Should have: ghost slices, crash/tail slices as transition material, bass gaps around kick/snare impacts
+- Avoid: slicing the break so densely that the groove loses its backbeat
+
+## Cut-up Garage
+
+- Tempo: 128-138 BPM
+- Must have: shuffled hats, syncopated kick, vocal or melodic chop identity, bouncy bass answers
+- Should have: swung trigger feel, final-beat motif variation, one-beat sample mute before the main return
+- Avoid: straight quantized vocal chops that fight the garage pocket
+
+## Cut-up DnB
+
+- Tempo: 160-176 BPM
+- Must have: break or two-step drum anchor, sub/reese space, sliced vocal or break identity, clear drop entry
+- Should have: 2-bar chop phrase, bar-end 1/16 or 1/32 repeats, one source reveal before or after the drop
+- Avoid: sustained bass under every kick and dense chop run
 
 ## Lo-fi
 

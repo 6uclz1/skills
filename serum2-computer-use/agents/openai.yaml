@@ -1,0 +1,4 @@
+interface:
+  display_name: "Serum 2 Computer Use"
+  short_description: "Control Serum 2 in Ableton with GUI checks"
+  default_prompt: "Use $serum2-computer-use to operate Serum 2 in Ableton Live with Rack Macros first and screenshot-verified Computer Use only when needed."

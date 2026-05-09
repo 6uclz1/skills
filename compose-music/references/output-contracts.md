@@ -90,6 +90,8 @@ Example:
 - `sample_ref`: sample asset id for `audio_loop` and `sliced_audio` tracks.
 - `audio_clip`: warp, loop, gain, and transpose intent for audio loop placement.
 - `slice_plan`: fixed-grid slice count, start pad, and trigger-clip intent for sliced break playback.
+- `source_material`: direct cut-up source description for user audio, recorded audio, browser audio, or placeholder material.
+- `cutup_pattern`: symbolic slice motif, slice map, and variation rule for cut-up/sample-chop tracks.
 - `sound_intent`: role-level acoustic intent, not a preset name.
 - `shape_intent`: envelope, filter, width, motion, and transient direction for handoff.
 - `kick_relationship`: `avoid`, `double`, `answer`, or `intentional_overlap` when low-end interaction matters.
@@ -98,7 +100,7 @@ Example:
 
 Use `scripts/grid_to_notes.py` for drum rows and `scripts/chords_to_notes.py` for chord tracks when exact MIDI notes matter. Use `grid_to_notes.py --payload` when timing feel metadata should be preserved alongside note JSON.
 
-Use `scripts/breakbeat_pattern_to_notes.py` when a sliced break pattern should become trigger MIDI. Use `scripts/resolve_sample_assets.py` to resolve private sample paths from `path_ref`, `root_env` plus `relative_path`, or a user manifest.
+Use `scripts/breakbeat_pattern_to_notes.py` when a sliced break pattern should become trigger MIDI. Use `scripts/cutup_pattern_to_notes.py` when symbolic chop tokens such as `S01`, `.`, `rest`, or `S03*4` should become trigger MIDI. Use `scripts/resolve_sample_assets.py` to resolve private sample paths from `path_ref`, `root_env` plus `relative_path`, or a user manifest.
 
 ## Sample Asset Fields
 
@@ -116,13 +118,49 @@ Example:
       "original_bpm": 136,
       "bars": 4,
       "trim": "downbeat_aligned",
-      "rights_status": "user_provided"
+      "rights_status": "private_test"
     }
   ]
 }
 ```
 
 Prefer `path_ref` for one-off local files, `root_env` plus `relative_path` for a private sample library root, and a user-level manifest for reusable named assets. Never emit `/Users/...`, `file://...`, or sample file names as `browser_query`.
+
+Allowed `rights_status` values are `original`, `cleared`, `royalty_free`, `private_test`, and `unknown`. Use `unknown` only for placeholder planning. Do not produce public, commercial, release, distribution, or master export targets from unknown-rights material.
+
+## Cut-up Fields
+
+Cut-up Ableton handoffs should keep the source, slicing, and trigger logic explicit:
+
+```json
+{
+  "source_material": {
+    "kind": "user_audio_file",
+    "role": "vocal",
+    "path": "<user-provided-audio-path>",
+    "rights_status": "private_test",
+    "source_bpm": null,
+    "source_key": null
+  },
+  "slice_plan": {
+    "method": "transient",
+    "max_slices": 16,
+    "start_pad_midi": 36,
+    "create_trigger_clip": true,
+    "trigger_clip_slot": 1,
+    "warp_mode": "beats_or_complex_pro",
+    "preserve_timing": true
+  },
+  "cutup_pattern": {
+    "unit": "1/16",
+    "slice_map": {"S01": 36, "S02": 37, "S03": 38},
+    "motif": ["S01", ".", "S03", "S02"],
+    "variation_strategy": "change final beat only"
+  }
+}
+```
+
+For a two-bar pattern request, emit only the pattern grid, trigger notes, and collision notes. Do not emit a full song template unless the user asks for an arrangement or Ableton implementation.
 
 ## Section Fields
 
@@ -165,6 +203,9 @@ The plan separates:
 - `clip_plan`: clip lengths, note source, and timing metadata.
 - `audio_clip_plan`: audio clip placement, warp, loop, gain, and source asset id for `audio_loop` tracks.
 - `slice_plan`: fixed-grid slicing intent and trigger note source for `sliced_audio` tracks.
+- `audio_asset_plan`: direct source material summaries for cut-up tracks.
+- `cutup_trigger_plan`: trigger clip slot, length, note source, notes, and symbolic pattern for cut-up tracks.
+- `cut_to_drum_rack_requests`: preserved execution intent for Drum Rack slicing.
 - `sample_assets`: unresolved user asset references copied from `composition_spec`.
 - `arrangement_sections`: section bars, density, active tracks, role layers, identity carrier, moves, and transition events.
 - `finish_criteria`: completion checks from the source spec.

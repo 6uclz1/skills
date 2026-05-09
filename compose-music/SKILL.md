@@ -20,6 +20,10 @@ Choose the smallest output mode that satisfies the request:
 - **Song Sketch Mode**: for loop-to-song expansion, arrangement plans, and complete human-readable sketches that do not need Ableton execution. Return the relevant song sections.
 - **Ableton Handoff Mode**: for "make this in Ableton", "implement", "generate clips", "MIDI JSON", or handoff requests. Return a concise human plan plus `composition_spec`.
 - **Sample Handoff Mode**: for user-owned audio such as Amen-style break samples. Return `sample_assets`, `audio_loop` or `sliced_audio` tracks, and keep local paths out of browser fields.
+- **Cut-up Idea Mode**: for cut-up, sample chop, vocal chop, sliced break, glitch collage, break edit, or IDM-style resequencing ideas. Return BPM, sample roles, slice grain, drum anchor, bass relationship, section shape, and rights/overcrowding risks.
+- **Cut-up Pattern Mode**: for 1-4 bar chop patterns. Return only the slice grid, trigger notes or trigger-note strategy, edit moves, and kick/sample collision notes.
+- **Cut-up Song Sketch Mode**: for 32-64 bar sample-chop arrangements. Return sections, density, slice roles, drum/sample call-response, bass entries, silence, reverse, stutter, and fills.
+- **Cut-up Ableton Handoff Mode**: for implementing cut-up material in Ableton. Return concise plan, `composition_spec`, `sample_asset_plan`, `slice_plan`, `cutup_trigger_notes`, `ableton_handoff_plan` intent, and validation checklist.
 - **Repair Mode**: for fixing an existing loop, arrangement, bassline, melody, or chord progression. Return diagnosis, edited material, and minimal execution notes.
 
 Default assumptions when the user gives no constraints:
@@ -30,6 +34,14 @@ Default assumptions when the user gives no constraints:
 - Arrangement target: `32` or `64 bars`
 - Genre: choose one focused electronic direction and state it.
 - Track count: 5 tracks: `Drums`, `Bass`, `Chords`, `Lead`, `Texture/FX`.
+
+Cut-up defaults when the user gives no constraints:
+- Genre: `cut-up electronic`
+- Tempo: `132 BPM`
+- Key/mode: `D minor`
+- Arrangement target: `32 bars`
+- Source roles: `vocal_or_melodic_sample`, `drum_loop_or_break`, `texture_sample`.
+- Track count: 6 tracks: `Drums`, `Sample Source`, `Cutup Rack`, `Bass`, `Chords/Stabs`, `Texture/FX`.
 
 Assume defaults for missing tempo, key, meter, genre, length, and track count. Ask at most one clarifying question only when the missing constraint would materially change the result or create conflicting deliverables.
 
@@ -46,6 +58,21 @@ Follow this sequence for song sketches and Ableton handoffs:
 7. **Structure**: expand the loop into sections using 4, 8, or 16 bar blocks.
 8. **Ableton Handoff**: specify tracks, clips, note grids, scene names, and arrangement durations.
 9. **Finish**: apply subtraction, commitment, and completion prompts.
+
+For Cut-up / Sampling Mode, use this sequence:
+
+1. Confirm or assume source material, then state whether execution requires user-provided or cleared audio.
+2. Decide rights/safety status: `original`, `cleared`, `royalty_free`, `private_test`, or `unknown`.
+3. Choose slicing method: `transient`, `beat`, `region`, `manual`, or `slice_count`.
+4. Build a stable drum anchor before dense slice edits.
+5. Build a 1-bar slice motif using only 3-5 slices.
+6. Build a 2-bar answer by changing only the final beat.
+7. Add bass after confirming kick/sample space.
+8. Expand into sections with density, mute moves, silence, reverse, stutter, and boundary fills.
+9. Emit `composition_spec` with `source_material`, `slice_plan`, `cutup_pattern`, and `rights_status` for Ableton handoff requests.
+10. Convert to `ableton_handoff_plan` before any `$ableton-cli` operation.
+
+Do not invent local audio paths, Ableton browser URIs, sample names, or preset names. If no audio is supplied, use a placeholder such as `<user-provided-audio-path>` and state that execution requires a user-provided or cleared audio file.
 
 ## Output Contract
 
@@ -80,6 +107,8 @@ Before finalizing Ableton-ready material, verify:
 - Browser targets are search queries or placeholders, not hard-coded paths, rack names, device presets, local file paths, or fake URIs.
 - User-owned samples use `sample_assets` with `path_ref`, `root_env` plus `relative_path`, or a private manifest. Do not emit `/Users/...`, `file://...`, or sample filenames in `browser_query` or `handoff.browser_queries`.
 - Audio-backed tracks set `source_type` to `audio_loop` or `sliced_audio`, use `sample_ref`, and include `audio_clip` or fixed-grid `slice_plan` as appropriate.
+- Cut-up tracks may instead use `source_material` with a placeholder path, `slice_plan.method`, `slice_plan.max_slices`, `slice_plan.start_pad_midi`, and `cutup_pattern.slice_map`.
+- `rights_status` is required for source material and sample handoff assets. Stop public, commercial, or distribution-oriented output when `rights_status` is `unknown`.
 - `composition_spec.handoff.browser_queries` repeats the browser search intent and remains path-free.
 - Section plans include density, foreground/midground/background roles, add/mute moves, and transition events when arranging a complete song.
 - Narrow requests do not return unrelated full-contract sections.
@@ -93,6 +122,7 @@ Use bundled scripts when deterministic conversion or validation is useful:
 
 - `scripts/grid_to_notes.py`: 16-step or 32-step drum grid to Ableton note JSON; each row may use `steps` or the equivalent `grid` alias. Use `--payload` when swing, shuffle, humanization, or polymeter metadata must survive handoff.
 - `scripts/breakbeat_pattern_to_notes.py`: fixed-grid Amen/breakbeat slice index patterns to Ableton trigger note JSON.
+- `scripts/cutup_pattern_to_notes.py`: symbolic cut-up patterns such as `S01`, `.`, `rest`, or `S03*4` to Ableton trigger note JSON.
 - `scripts/chords_to_notes.py`: tonic, mode, roman numerals, explicit chord quality, borrowed chords, inversions, slash chords, and extensions to chord note JSON.
 - `scripts/validate_composition_spec.py`: validate Ableton-ready `composition_spec`.
 - `scripts/resolve_sample_assets.py`: resolve private sample asset manifests or environment variable references outside generated specs.

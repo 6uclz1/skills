@@ -1,0 +1,169 @@
+{
+  "template": {
+    "ableton_set": "ComputerUse_Serum_Template.als",
+    "track_name": "SERUM_AGENT",
+    "plugin_priority": ["Serum 2 VST3", "Serum 2 AU", "Serum VST3", "Serum AU"],
+    "fixed_layout": {
+      "resolution": ["1440x900", "1600x1000"],
+      "single_monitor": true,
+      "serum_ui_scale": ["100%", "125%"],
+      "plugin_window_position": "fixed from template"
+    }
+  },
+  "rack_macros": {
+    "Brightness": {
+      "targets": ["filter_cutoff"],
+      "intent": "Brighter or darker tone by moving filter cutoff."
+    },
+    "Bite": {
+      "targets": ["filter_drive", "distortion_drive"],
+      "intent": "Sharper attack, harmonic edge, or growl."
+    },
+    "Movement": {
+      "targets": ["lfo1_amount_to_cutoff", "lfo1_amount_to_wt_pos", "osc_a_wt_pos"],
+      "intent": "Motion from LFO and wavetable position."
+    },
+    "Attack": {
+      "targets": ["env1_attack"],
+      "intent": "Amp envelope attack time."
+    },
+    "Decay": {
+      "targets": ["env1_decay"],
+      "intent": "Amp envelope decay time."
+    },
+    "Release": {
+      "targets": ["env1_release"],
+      "intent": "Amp envelope release tail."
+    },
+    "Space": {
+      "targets": ["reverb_mix", "delay_mix"],
+      "intent": "Room, tail, and echo amount."
+    },
+    "Width": {
+      "targets": ["hyper_dimension_mix", "chorus_mix"],
+      "intent": "Stereo width and ensemble feel."
+    }
+  },
+  "parameters": {
+    "osc_a_level": {
+      "preferred_method": "live_panel",
+      "fallback_method": "serum_gui_drag",
+      "ui_hint": "OSC A LEVEL knob"
+    },
+    "osc_a_wt_pos": {
+      "preferred_method": "live_panel",
+      "fallback_method": "serum_gui_drag",
+      "ui_hint": "OSC A wavetable position knob"
+    },
+    "osc_b_level": {
+      "preferred_method": "live_panel",
+      "fallback_method": "serum_gui_drag",
+      "ui_hint": "OSC B LEVEL knob"
+    },
+    "noise_level": {
+      "preferred_method": "live_panel",
+      "fallback_method": "serum_gui_drag",
+      "ui_hint": "NOISE LEVEL knob"
+    },
+    "sub_level": {
+      "preferred_method": "live_panel",
+      "fallback_method": "serum_gui_drag",
+      "ui_hint": "SUB LEVEL knob"
+    },
+    "filter_cutoff": {
+      "preferred_method": "rack_macro",
+      "fallback_method": "live_panel",
+      "ui_hint": "Filter cutoff knob"
+    },
+    "filter_resonance": {
+      "preferred_method": "live_panel",
+      "fallback_method": "rack_macro",
+      "ui_hint": "Filter resonance knob"
+    },
+    "filter_drive": {
+      "preferred_method": "rack_macro",
+      "fallback_method": "live_panel",
+      "ui_hint": "Filter drive knob"
+    },
+    "filter_mix": {
+      "preferred_method": "live_panel",
+      "fallback_method": "serum_gui_drag",
+      "ui_hint": "Filter mix knob"
+    },
+    "env1_attack": {
+      "preferred_method": "rack_macro",
+      "fallback_method": "live_panel",
+      "ui_hint": "ENV 1 attack handle or knob"
+    },
+    "env1_decay": {
+      "preferred_method": "rack_macro",
+      "fallback_method": "live_panel",
+      "ui_hint": "ENV 1 decay handle or knob"
+    },
+    "env1_sustain": {
+      "preferred_method": "live_panel",
+      "fallback_method": "serum_gui_drag",
+      "ui_hint": "ENV 1 sustain handle or knob"
+    },
+    "env1_release": {
+      "preferred_method": "rack_macro",
+      "fallback_method": "live_panel",
+      "ui_hint": "ENV 1 release handle or knob"
+    },
+    "lfo1_rate": {
+      "preferred_method": "live_panel",
+      "fallback_method": "serum_gui_drag",
+      "ui_hint": "LFO 1 rate control"
+    },
+    "lfo1_amount_to_cutoff": {
+      "preferred_method": "rack_macro",
+      "fallback_method": "serum_gui_drag",
+      "ui_hint": "Matrix or modulation ring amount to filter cutoff"
+    },
+    "lfo1_amount_to_wt_pos": {
+      "preferred_method": "rack_macro",
+      "fallback_method": "serum_gui_drag",
+      "ui_hint": "Matrix or modulation ring amount to wavetable position"
+    },
+    "distortion_drive": {
+      "preferred_method": "rack_macro",
+      "fallback_method": "serum_gui_drag",
+      "ui_hint": "FX distortion drive control"
+    },
+    "hyper_dimension_mix": {
+      "preferred_method": "rack_macro",
+      "fallback_method": "serum_gui_drag",
+      "ui_hint": "FX hyper/dimension mix control"
+    },
+    "chorus_mix": {
+      "preferred_method": "rack_macro",
+      "fallback_method": "serum_gui_drag",
+      "ui_hint": "FX chorus mix control"
+    },
+    "delay_mix": {
+      "preferred_method": "rack_macro",
+      "fallback_method": "serum_gui_drag",
+      "ui_hint": "FX delay mix control"
+    },
+    "reverb_mix": {
+      "preferred_method": "rack_macro",
+      "fallback_method": "live_panel",
+      "ui_hint": "FX reverb mix control"
+    },
+    "eq_low": {
+      "preferred_method": "live_panel",
+      "fallback_method": "serum_gui_drag",
+      "ui_hint": "FX EQ low gain control"
+    },
+    "eq_high": {
+      "preferred_method": "live_panel",
+      "fallback_method": "serum_gui_drag",
+      "ui_hint": "FX EQ high gain control"
+    },
+    "compressor_mix": {
+      "preferred_method": "live_panel",
+      "fallback_method": "serum_gui_drag",
+      "ui_hint": "FX compressor mix control"
+    }
+  }
+}

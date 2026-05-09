@@ -18,6 +18,20 @@ NOTE_FIELDS = ("pitch", "start_time", "duration", "velocity", "mute")
 KICK_RELATIONSHIPS = {"avoid", "double", "answer", "intentional_overlap"}
 SOURCE_TYPES = {"midi", "audio_loop", "sliced_audio"}
 WARP_MODES = {"beats", "tones", "texture", "re-pitch", "complex", "complex_pro"}
+RIGHTS_STATUSES = {"original", "cleared", "royalty_free", "private_test", "unknown"}
+SOURCE_MATERIAL_KINDS = {"user_audio_file", "browser_audio", "recorded_audio", "placeholder"}
+SOURCE_MATERIAL_ROLES = {
+    "vocal",
+    "melodic_loop",
+    "drum_break",
+    "texture",
+    "field_recording",
+    "unknown",
+    "vocal_or_melodic_sample",
+    "drum_loop_or_break",
+    "texture_sample",
+}
+SLICE_METHODS = {"transient", "beat", "region", "manual", "slice_count"}
 GRID_ACTIVE_SYMBOLS = {"x", "X", "1"}
 GRID_REST_SYMBOLS = {".", "-", "_", "0"}
 SCHEMA_PATH = pathlib.Path(__file__).resolve().parents[1] / "references" / "composition_spec.schema.json"
@@ -48,6 +62,14 @@ def _is_path_like(value):
     if re.search(r"\.(adg|adv|als|wav|aif|aiff|mp3|midi?|alp)$", text, re.IGNORECASE):
         return True
     return False
+
+
+def _is_uri(value):
+    return isinstance(value, str) and re.match(r"^[a-z][a-z0-9+.-]*://", value, re.IGNORECASE) is not None
+
+
+def _is_placeholder(value):
+    return isinstance(value, str) and value.startswith("<") and value.endswith(">")
 
 
 def _is_env_name(value):
@@ -130,6 +152,13 @@ def _validate_timing_metadata(obj, path, errors):
             errors.append(f"{path}.polymeter_reset_bar must be positive")
 
 
+def _validate_rights_status(value, path, errors):
+    if value is None:
+        errors.append(f"{path} is required")
+    elif value not in RIGHTS_STATUSES:
+        errors.append(f"{path} must be one of {sorted(RIGHTS_STATUSES)}")
+
+
 def _validate_sample_assets(sample_assets, errors):
     if sample_assets is None:
         return {}
@@ -166,7 +195,11 @@ def _validate_sample_assets(sample_assets, errors):
                 or re.match(r"^[a-z]+://", relative_path, re.IGNORECASE)
             ):
                 errors.append(f"{path}.relative_path must be relative and URI-free")
-        for field in ("source", "trim", "rights_status"):
+        if "rights_status" not in asset:
+            errors.append(f"{path}.rights_status is required")
+        else:
+            _validate_rights_status(asset["rights_status"], f"{path}.rights_status", errors)
+        for field in ("source", "trim"):
             if field in asset and not isinstance(asset[field], str):
                 errors.append(f"{path}.{field} must be a string")
         for field in ("original_bpm", "bars"):
@@ -193,7 +226,7 @@ def _validate_audio_clip(audio_clip, path, errors):
             errors.append(f"{path}.{field} must be numeric")
 
 
-def _validate_slice_plan(slice_plan, path, errors):
+def _validate_legacy_slice_plan(slice_plan, path, errors):
     if not isinstance(slice_plan, dict):
         errors.append(f"{path} must be an object")
         return
@@ -215,6 +248,120 @@ def _validate_slice_plan(slice_plan, path, errors):
         errors.append(f"{path}.create_trigger_clip must be boolean")
 
 
+def _validate_cutup_slice_plan(slice_plan, path, errors):
+    if not isinstance(slice_plan, dict):
+        errors.append(f"{path} must be an object")
+        return
+    method = slice_plan.get("method")
+    if method not in SLICE_METHODS:
+        errors.append(f"{path}.method must be one of {sorted(SLICE_METHODS)}")
+    max_slices = slice_plan.get("max_slices")
+    start_pad = slice_plan.get("start_pad_midi")
+    if not isinstance(max_slices, int):
+        errors.append(f"{path}.max_slices must be an integer")
+    elif not 1 <= max_slices <= 128:
+        errors.append(f"{path}.max_slices must be 1-128")
+    if not isinstance(start_pad, int):
+        errors.append(f"{path}.start_pad_midi must be an integer")
+    elif not 0 <= start_pad <= 127:
+        errors.append(f"{path}.start_pad_midi must be 0-127")
+    if isinstance(max_slices, int) and isinstance(start_pad, int) and start_pad + max_slices - 1 > 127:
+        errors.append(f"{path}.max_slices must keep generated pitches in MIDI range")
+    if "create_trigger_clip" in slice_plan and not isinstance(slice_plan["create_trigger_clip"], bool):
+        errors.append(f"{path}.create_trigger_clip must be boolean")
+    if "trigger_clip_slot" in slice_plan:
+        value = slice_plan["trigger_clip_slot"]
+        if not isinstance(value, int) or value < 0:
+            errors.append(f"{path}.trigger_clip_slot must be a non-negative integer")
+    if "preserve_timing" in slice_plan and not isinstance(slice_plan["preserve_timing"], bool):
+        errors.append(f"{path}.preserve_timing must be boolean")
+
+
+def _validate_slice_plan(slice_plan, path, errors):
+    if not isinstance(slice_plan, dict):
+        errors.append(f"{path} must be an object")
+        return
+    if "method" in slice_plan or "max_slices" in slice_plan or "start_pad_midi" in slice_plan:
+        _validate_cutup_slice_plan(slice_plan, path, errors)
+    else:
+        _validate_legacy_slice_plan(slice_plan, path, errors)
+
+
+def _validate_source_material(source_material, path, errors, warnings):
+    if not isinstance(source_material, dict):
+        errors.append(f"{path} must be an object")
+        return
+    for field in ("kind", "role", "rights_status"):
+        if field not in source_material:
+            errors.append(f"{path}.{field} is required")
+    kind = source_material.get("kind")
+    if kind in SOURCE_MATERIAL_KINDS:
+        if kind == "user_audio_file":
+            source_path = source_material.get("path")
+            if not isinstance(source_path, str) or not source_path:
+                warnings.append(f"{path}.path is required before Ableton audio import execution")
+            elif _is_uri(source_path):
+                errors.append(f"{path}.path must be a placeholder or deferred user path, not a URI")
+            elif _is_placeholder(source_path):
+                warnings.append(f"{path}.path is a placeholder; Ableton execution requires a user-provided audio file")
+    elif kind is not None:
+        errors.append(f"{path}.kind must be one of {sorted(SOURCE_MATERIAL_KINDS)}")
+    role = source_material.get("role")
+    if role is not None and role not in SOURCE_MATERIAL_ROLES:
+        errors.append(f"{path}.role must be one of {sorted(SOURCE_MATERIAL_ROLES)}")
+    _validate_rights_status(source_material.get("rights_status"), f"{path}.rights_status", errors)
+    for field in ("source_bpm", "source_key"):
+        if field in source_material and source_material[field] is not None:
+            expected = (int, float) if field == "source_bpm" else str
+            if not isinstance(source_material[field], expected):
+                errors.append(f"{path}.{field} has an invalid type")
+
+
+def _validate_cutup_pattern(pattern, path, errors):
+    if not isinstance(pattern, dict):
+        errors.append(f"{path} must be an object")
+        return
+    unit = pattern.get("unit", pattern.get("step_unit"))
+    if unit is not None and unit not in {"1/16", "1/32", "1/8T", "1/16T"}:
+        errors.append(f"{path}.unit must be one of ['1/16', '1/32', '1/8T', '1/16T']")
+    slice_map = pattern.get("slice_map")
+    if not isinstance(slice_map, dict) or not slice_map:
+        errors.append(f"{path}.slice_map must be a non-empty object")
+    else:
+        for slice_id, pitch in slice_map.items():
+            if not isinstance(slice_id, str) or not slice_id:
+                errors.append(f"{path}.slice_map keys must be non-empty strings")
+            if not isinstance(pitch, int) or not 0 <= pitch <= 127:
+                errors.append(f"{path}.slice_map.{slice_id} must be a MIDI pitch 0-127")
+    for field in ("motif", "pattern"):
+        if field in pattern and not isinstance(pattern[field], list):
+            errors.append(f"{path}.{field} must be an array")
+    if "variation_strategy" in pattern and not isinstance(pattern["variation_strategy"], str):
+        errors.append(f"{path}.variation_strategy must be a string")
+
+
+def _commercial_or_public_export(export_target):
+    if not isinstance(export_target, str):
+        return False
+    return re.search(r"\b(commercial|public|release|distribution|distribute|master)\b", export_target, re.IGNORECASE) is not None
+
+
+def _collect_rights(spec):
+    statuses = []
+    for asset in spec.get("sample_assets", []) if isinstance(spec.get("sample_assets"), list) else []:
+        if isinstance(asset, dict) and "rights_status" in asset:
+            statuses.append(asset["rights_status"])
+    for track in spec.get("tracks", []) if isinstance(spec.get("tracks"), list) else []:
+        if isinstance(track, dict) and isinstance(track.get("source_material"), dict):
+            statuses.append(track["source_material"].get("rights_status"))
+    handoff = spec.get("handoff", {})
+    if isinstance(handoff, dict):
+        for asset in handoff.get("sample_assets", []) if isinstance(handoff.get("sample_assets"), list) else []:
+            if isinstance(asset, dict) and "rights_status" in asset:
+                statuses.append(asset["rights_status"])
+    return statuses
+
+
 def _validate_track_refs(values, path, track_names, errors):
     if not isinstance(values, list):
         errors.append(f"{path} must be an array")
@@ -226,6 +373,7 @@ def _validate_track_refs(values, path, track_names, errors):
 
 def validate_spec(spec):
     errors = _validate_with_jsonschema(spec)
+    warnings = []
     if not isinstance(spec, dict):
         return {"ok": False, "errors": ["composition_spec must be an object"]}
 
@@ -278,7 +426,9 @@ def validate_spec(spec):
             if source_type not in SOURCE_TYPES:
                 errors.append(f"{path}.source_type must be one of {sorted(SOURCE_TYPES)}")
                 source_type = "midi"
-            if source_type in {"audio_loop", "sliced_audio"}:
+            if "source_material" in track:
+                _validate_source_material(track["source_material"], f"{path}.source_material", errors, warnings)
+            if source_type in {"audio_loop", "sliced_audio"} and "source_material" not in track:
                 sample_ref = track.get("sample_ref")
                 if not isinstance(sample_ref, str) or not sample_ref:
                     errors.append(f"{path}.sample_ref is required for {source_type}")
@@ -291,6 +441,10 @@ def validate_spec(spec):
                     errors.append(f"{path}.slice_plan is required for sliced_audio")
                 else:
                     _validate_slice_plan(track["slice_plan"], f"{path}.slice_plan", errors)
+            elif "slice_plan" in track:
+                _validate_slice_plan(track["slice_plan"], f"{path}.slice_plan", errors)
+            if "cutup_pattern" in track:
+                _validate_cutup_pattern(track["cutup_pattern"], f"{path}.cutup_pattern", errors)
             for field in ("sound_intent", "shape_intent"):
                 if field in track and not isinstance(track[field], str):
                     errors.append(f"{path}.{field} must be a string")
@@ -352,6 +506,30 @@ def validate_spec(spec):
                     errors.append(f"handoff.browser_queries[{index}] must be a search query or placeholder, not a path")
         if "export_target" in handoff and not isinstance(handoff["export_target"], str):
             errors.append("handoff.export_target must be a string")
+        if "sample_assets" in handoff:
+            assets = handoff["sample_assets"]
+            if not isinstance(assets, list):
+                errors.append("handoff.sample_assets must be an array")
+            else:
+                for index, asset in enumerate(assets):
+                    asset_path = f"handoff.sample_assets[{index}]"
+                    if not isinstance(asset, dict):
+                        errors.append(f"{asset_path} must be an object")
+                        continue
+                    _validate_rights_status(asset.get("rights_status"), f"{asset_path}.rights_status", errors)
+        if "cut_to_drum_rack_requests" in handoff:
+            requests = handoff["cut_to_drum_rack_requests"]
+            if not isinstance(requests, list):
+                errors.append("handoff.cut_to_drum_rack_requests must be an array")
+            else:
+                for index, request in enumerate(requests):
+                    request_path = f"handoff.cut_to_drum_rack_requests[{index}]"
+                    if not isinstance(request, dict):
+                        errors.append(f"{request_path} must be an object")
+                        continue
+                    source_file = request.get("source_file")
+                    if source_file is not None and _is_uri(source_file):
+                        errors.append(f"{request_path}.source_file must be a placeholder or deferred user path, not a URI")
         if "sample_asset_refs" in handoff:
             refs = handoff["sample_asset_refs"]
             if not isinstance(refs, list):
@@ -365,7 +543,11 @@ def validate_spec(spec):
     if not isinstance(finish_criteria, list) or not finish_criteria:
         errors.append("finish_criteria must be a non-empty array")
 
-    return {"ok": not errors, "errors": errors}
+    if isinstance(handoff, dict) and _commercial_or_public_export(handoff.get("export_target")):
+        if "unknown" in _collect_rights(spec):
+            errors.append("rights_status unknown cannot be used for commercial or public export targets")
+
+    return {"ok": not errors, "errors": errors, "warnings": warnings}
 
 
 def main(argv=None):

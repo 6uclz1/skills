@@ -5,6 +5,7 @@ Repository-scoped Codex skills maintained by `6uclz1`.
 ## Skills
 
 - `compose-music`: compose Ableton-ready electronic music sketches, MIDI grids, arrangements, `composition_spec` handoffs, evals, and helper scripts.
+- `serum2-computer-use`: operate Serum 2 or Serum in Ableton Live with Rack Macro-first control and screenshot-verified Computer Use fallbacks.
 - `tech-news-digest`: scan English and Japanese developer community feeds and produce concise technology digests.
 
 Each skill has its own README or `SKILL.md` for detailed usage. `compose-music/README.md` is the entry point for composition specs, helper scripts, examples, and evals.

@@ -1,0 +1,13 @@
+{
+  "summary": "A short video introduces a simple recording moment.",
+  "key_points": ["The speaker is at a zoo.", "The clip is brief."],
+  "topics": ["introduction", "YouTube history"],
+  "chapters": [
+    {
+      "timestamp": "00:00",
+      "title": "Opening",
+      "summary": "The speaker introduces the scene."
+    }
+  ],
+  "warnings": []
+}

@@ -120,6 +120,12 @@
         "slice_plan": {
           "$ref": "#/$defs/slice_plan"
         },
+        "source_material": {
+          "$ref": "#/$defs/source_material"
+        },
+        "cutup_pattern": {
+          "$ref": "#/$defs/cutup_pattern"
+        },
         "sound_intent": {
           "type": "string",
           "minLength": 1
@@ -200,8 +206,7 @@
           "minLength": 1
         },
         "rights_status": {
-          "type": "string",
-          "minLength": 1
+          "$ref": "#/$defs/rights_status"
         }
       }
     },
@@ -227,26 +232,134 @@
       }
     },
     "slice_plan": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": true,
+          "required": ["mode", "slice_count", "start_pad"],
+          "properties": {
+            "mode": {
+              "const": "fixed_grid"
+            },
+            "slice_count": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 128
+            },
+            "start_pad": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 127
+            },
+            "create_trigger_clip": {
+              "type": "boolean"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["method", "max_slices", "start_pad_midi"],
+          "properties": {
+            "method": {
+              "enum": ["transient", "beat", "region", "manual", "slice_count"]
+            },
+            "resolution": {
+              "type": "string",
+              "minLength": 1
+            },
+            "max_slices": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 128
+            },
+            "start_pad_midi": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 127
+            },
+            "create_trigger_clip": {
+              "type": "boolean"
+            },
+            "trigger_clip_slot": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "warp_mode": {
+              "type": "string",
+              "minLength": 1
+            },
+            "preserve_timing": {
+              "type": "boolean"
+            }
+          }
+        }
+      ]
+    },
+    "source_material": {
       "type": "object",
-      "additionalProperties": true,
-      "required": ["mode", "slice_count", "start_pad"],
+      "additionalProperties": false,
+      "required": ["kind", "role", "rights_status"],
       "properties": {
-        "mode": {
-          "const": "fixed_grid"
+        "kind": {
+          "enum": ["user_audio_file", "browser_audio", "recorded_audio", "placeholder"]
         },
-        "slice_count": {
-          "type": "integer",
-          "minimum": 1
+        "role": {
+          "enum": [
+            "vocal",
+            "melodic_loop",
+            "drum_break",
+            "texture",
+            "field_recording",
+            "unknown",
+            "vocal_or_melodic_sample",
+            "drum_loop_or_break",
+            "texture_sample"
+          ]
         },
-        "start_pad": {
-          "type": "integer",
-          "minimum": 0,
-          "maximum": 127
+        "path": {
+          "type": "string"
         },
-        "create_trigger_clip": {
-          "type": "boolean"
+        "rights_status": {
+          "$ref": "#/$defs/rights_status"
+        },
+        "source_bpm": {
+          "type": ["number", "null"]
+        },
+        "source_key": {
+          "type": ["string", "null"]
         }
       }
+    },
+    "cutup_pattern": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "unit": {
+          "enum": ["1/16", "1/32", "1/8T", "1/16T"]
+        },
+        "slice_map": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 127
+          }
+        },
+        "motif": {
+          "type": "array"
+        },
+        "pattern": {
+          "type": "array"
+        },
+        "variation_strategy": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "rights_status": {
+      "enum": ["original", "cleared", "royalty_free", "private_test", "unknown"]
     },
     "note": {
       "type": "object",

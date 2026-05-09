@@ -14,6 +14,7 @@ Use these as starting points. Convert them to the user's genre, tempo, key, and 
 - Tension and fills
 - Polymetric loops
 - Variation moves
+- Cut-up recipes
 
 ## Drum Notation
 
@@ -249,3 +250,85 @@ Use one variation move at a time:
 - Move melody up an octave for the peak.
 - Replace the final melody note with a suspension.
 - Silence foreground for one bar before the hook returns.
+
+## Cut-up Recipes
+
+Core method:
+
+1. Choose one identity carrier sample.
+2. Slice into 8, 12, or 16 useful fragments.
+3. Build a 1-bar motif using only 3-5 slices.
+4. Build a 2-bar answer by changing only the final beat.
+5. Add silence before important impacts.
+6. Use stutter only at phrase boundaries unless the genre is glitch-heavy.
+
+Slice functions:
+
+- `anchor`: recognizable vowel, chord, or transient.
+- `pickup`: short fragment before a downbeat.
+- `answer`: response after snare or clap.
+- `fill`: rapid repeat on steps 13-16.
+- `ghost`: low-velocity fragment between hats.
+- `tail`: reverb/delay texture after the phrase.
+
+Variation moves:
+
+- Repeat a slice on 1/32 or 1/16.
+- Replace the final slice with silence.
+- Reverse one boundary slice.
+- Pitch up a response slice by +3, +5, +7, or +12.
+- Gate a long phrase into 1/8 chunks.
+- Drop all chops for one beat before the hook returns.
+
+Stutter recipe:
+
+```text
+Steps:  01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16
+Chop:   S01 .  S03 S02 .  S04 .  .  S02 .  S03 .  S04*2 S01 . .
+Intent: identity, answer, rest, phrase-boundary repeat
+```
+
+Silence recipe:
+
+- Remove the chop on step 13 or the whole beat 4 before a hook entry.
+- Keep kick or clap present unless the silence is meant as a full stop.
+- Let delay or reverb tail carry the space if the track feels too dry.
+
+Boundary fill recipe:
+
+- Use `S03*4`, `S07*2`, or a reverse slice only in the last beat of a 2-, 4-, or 8-bar phrase.
+- Keep the first beat after the fill simple so the listener can reset.
+
+Drum/sample call-response:
+
+- Put kick or snare anchors first.
+- Place anchor slices after the backbeat, not directly on every drum hit.
+- Use ghost slices between hats at lower velocity.
+- If the sample has low-mid weight, shorten bass notes or move bass attacks away from sample starts.
+
+8-slice example:
+
+```json
+{
+  "slice_map": {"S01": 36, "S02": 37, "S03": 38, "S04": 39, "S05": 40, "S06": 41, "S07": 42, "S08": 43},
+  "pattern": ["S01", ".", "S03", "S02", ".", "S04", ".", ".", "S02", ".", "S03", ".", "S04*2", "S01", ".", "."]
+}
+```
+
+12-slice example:
+
+```json
+{
+  "slice_map": {"S01": 36, "S02": 37, "S03": 38, "S04": 39, "S05": 40, "S06": 41, "S07": 42, "S08": 43, "S09": 44, "S10": 45, "S11": 46, "S12": 47},
+  "pattern": ["S01", ".", "S05", "S03", ".", "S07", ".", ".", "S02", "S04", ".", "S09", "S10*2", ".", "S03", "."]
+}
+```
+
+16-slice example:
+
+```json
+{
+  "slice_map": {"S01": 36, "S02": 37, "S03": 38, "S04": 39, "S05": 40, "S06": 41, "S07": 42, "S08": 43, "S09": 44, "S10": 45, "S11": 46, "S12": 47, "S13": 48, "S14": 49, "S15": 50, "S16": 51},
+  "pattern": ["S01", ".", "S09", "S04", "S02", ".", ".", "S11", "S05", ".", "S03", ".", "S14*2", "S08", ".", "."]
+}
+```

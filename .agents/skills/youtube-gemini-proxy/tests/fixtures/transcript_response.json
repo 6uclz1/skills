@@ -1,0 +1,14 @@
+{
+  "is_official_caption": false,
+  "transcript_type": "model_generated",
+  "summary": "A brief spoken clip.",
+  "segments": [
+    {
+      "timestamp": "00:00",
+      "end_timestamp": null,
+      "text": "All right, so here we are...",
+      "language": "en"
+    }
+  ],
+  "warnings": []
+}

@@ -1,0 +1,134 @@
+{
+  "operations": [
+    {
+      "name": "open_serum_window",
+      "args": [],
+      "method_order": ["ableton_focus", "track_select", "device_show", "computer_use"],
+      "verify": [
+        "Ableton Live is foregrounded",
+        "SERUM_AGENT track is selected",
+        "Serum UI is visible",
+        "preset name area is visible",
+        "no modal dialog is blocking"
+      ]
+    },
+    {
+      "name": "select_serum_preset",
+      "args": ["preset_query"],
+      "method_order": ["computer_use"],
+      "verify": [
+        "preset browser opened",
+        "preset name changed or selected preset is highlighted",
+        "no account or license dialog is blocking",
+        "MIDI note playback produces meter activity"
+      ]
+    },
+    {
+      "name": "set_macro",
+      "args": ["macro_name", "normalized_value_0_1"],
+      "method_order": ["rack_macro", "live_api", "computer_use"],
+      "verify": [
+        "macro value changed",
+        "mapped parameter change is visible or readable"
+      ]
+    },
+    {
+      "name": "set_live_panel_parameter",
+      "args": ["parameter_name", "normalized_value_0_1"],
+      "method_order": ["live_panel", "max_for_live", "remote_script", "computer_use"],
+      "verify": [
+        "parameter is exposed in Live panel",
+        "parameter value changed",
+        "device remains enabled"
+      ]
+    },
+    {
+      "name": "set_serum_gui_knob",
+      "args": ["ui_target", "direction", "amount"],
+      "method_order": ["computer_use"],
+      "verify": [
+        "target UI was visible before drag",
+        "knob or handle position changed after drag",
+        "no accidental tab or preset change occurred"
+      ]
+    },
+    {
+      "name": "create_midi_test_clip",
+      "args": ["notes", "length_bars"],
+      "method_order": ["live_api", "max_for_live", "keyboard_shortcut", "computer_use"],
+      "verify": [
+        "clip exists on SERUM_AGENT",
+        "notes are present",
+        "track plays"
+      ]
+    },
+    {
+      "name": "render_audio_preview",
+      "args": ["length_bars", "output_path"],
+      "method_order": ["ableton_export", "resample_track"],
+      "requires_user_confirmation": true,
+      "verify": [
+        "audio file exists",
+        "audio file is non-silent",
+        "render path matches the confirmed destination"
+      ]
+    }
+  ],
+  "mvp": [
+    {
+      "id": "mvp_1_open_set",
+      "done_when": [
+        "Ableton Live is running",
+        "ComputerUse_Serum_Template.als is open",
+        "SERUM_AGENT is selected",
+        "Serum plug-in window is visible"
+      ]
+    },
+    {
+      "id": "mvp_2_select_preset",
+      "done_when": [
+        "preset browser opens",
+        "requested or close preset is selected",
+        "MIDI note playback shows meter activity"
+      ]
+    },
+    {
+      "id": "mvp_3_macro_edit",
+      "done_when": [
+        "filter_cutoff changes from low to high",
+        "env1_attack becomes short",
+        "reverb_mix increases",
+        "values are confirmed by screenshot or Live panel readback"
+      ]
+    },
+    {
+      "id": "mvp_4_sound_intent",
+      "done_when": [
+        "sound intent is translated to structured parameters",
+        "macro or Live panel edits are applied",
+        "one-bar MIDI clip plays",
+        "changed settings are reported"
+      ]
+    }
+  ],
+  "failure_classes": {
+    "ui_not_found": {
+      "action": "retry screenshot, refocus Ableton, show plug-in window, then stop if target remains invisible"
+    },
+    "wrong_window": {
+      "action": "activate Ableton and select SERUM_AGENT before continuing"
+    },
+    "drag_inaccurate": {
+      "action": "use Rack Macro or Live panel fallback before another GUI drag"
+    },
+    "parameter_not_exposed": {
+      "action": "enter Configure Mode only when safe, expose the parameter, then prefer Live panel control"
+    },
+    "audio_silent": {
+      "action": "check track arm, MIDI clip, device power, output routing, and meter activity"
+    },
+    "modal_dialog": {
+      "action": "stop and ask for confirmation when destructive, account-related, license-related, payment-related, or otherwise unexpected"
+    }
+  }
+}

@@ -1,0 +1,97 @@
+{
+  "version": "1.0",
+  "brief": {
+    "genre": "break cut-up",
+    "bpm": 138,
+    "meter": "4/4",
+    "key": "F",
+    "mode": "minor",
+    "length_bars": 16,
+    "creative_constraint": "one drum break supplies all foreground rhythmic edits",
+    "genre_traits": [
+      "break transient identity stays recognizable",
+      "bar-end resequencing creates movement",
+      "sub bass avoids kick and snare anchors"
+    ]
+  },
+  "tracks": [
+    {
+      "name": "Break Cutup Rack",
+      "role": "foreground sliced drum break",
+      "source_type": "sliced_audio",
+      "clip_length_bars": 2,
+      "browser_query": "Drum Rack for sliced break playback",
+      "source_material": {
+        "kind": "user_audio_file",
+        "role": "drum_break",
+        "path": "<user-provided-audio-path>",
+        "rights_status": "private_test",
+        "source_bpm": null,
+        "source_key": null
+      },
+      "slice_plan": {
+        "method": "transient",
+        "max_slices": 16,
+        "start_pad_midi": 36,
+        "create_trigger_clip": true,
+        "trigger_clip_slot": 1,
+        "warp_mode": "beats_or_complex_pro",
+        "preserve_timing": true
+      },
+      "cutup_pattern": {
+        "unit": "1/16",
+        "slice_map": {"S01": 36, "S02": 37, "S03": 38, "S04": 39, "S05": 40, "S06": 41, "S07": 42, "S08": 43},
+        "motif": ["S01", "S02", ".", "S04", "S05", ".", "S03", ".", "S01", ".", "S06", "S04", "S07*2", ".", "S08", "."],
+        "variation_strategy": "keep snare anchor stable; change bar-end slices only"
+      },
+      "notes": [
+        {"pitch": 36, "start_time": 0.0, "duration": 0.25, "velocity": 116, "mute": false},
+        {"pitch": 37, "start_time": 0.25, "duration": 0.25, "velocity": 92, "mute": false},
+        {"pitch": 39, "start_time": 0.75, "duration": 0.25, "velocity": 100, "mute": false}
+      ],
+      "sound_intent": "punchy transient slices with short tails and one crash or ride tail for transitions",
+      "shape_intent": "preserve attack, trim low rumble, avoid long overlapping tails"
+    },
+    {
+      "name": "Sub Bass",
+      "role": "low-end support",
+      "clip_length_bars": 2,
+      "browser_query": "short sine sub bass",
+      "kick_relationship": "avoid",
+      "notes": [
+        {"pitch": 29, "start_time": 1.5, "duration": 0.5, "velocity": 96, "mute": false},
+        {"pitch": 32, "start_time": 3.0, "duration": 0.5, "velocity": 90, "mute": false}
+      ]
+    },
+    {
+      "name": "Texture/FX",
+      "role": "reverse and delay boundary edits",
+      "clip_length_bars": 4,
+      "browser_query": "reverse noise and tape delay",
+      "notes": []
+    }
+  ],
+  "sections": [
+    {"name": "Break Reveal", "start_bar": 1, "length_bars": 4, "density": 2, "active_tracks": ["Break Cutup Rack"], "foreground": ["Break Cutup Rack"], "midground": [], "background": [], "identity_carrier": "Break Cutup Rack", "move": "play recognizable source order with small gaps", "transition_event": "final beat repeat"},
+    {"name": "Groove", "start_bar": 5, "length_bars": 4, "density": 4, "active_tracks": ["Break Cutup Rack", "Sub Bass"], "foreground": ["Break Cutup Rack"], "midground": ["Sub Bass"], "background": [], "identity_carrier": "Break Cutup Rack", "move": "resequence final beat only", "transition_event": "one-beat drum mute"},
+    {"name": "Edit Break", "start_bar": 9, "length_bars": 4, "density": 3, "active_tracks": ["Break Cutup Rack", "Texture/FX"], "foreground": ["Break Cutup Rack"], "midground": ["Texture/FX"], "background": [], "identity_carrier": "Break Cutup Rack", "move": "drop sub and expose edits", "transition_event": "reverse tail into return"},
+    {"name": "Return", "start_bar": 13, "length_bars": 4, "density": 5, "active_tracks": ["Break Cutup Rack", "Sub Bass", "Texture/FX"], "foreground": ["Break Cutup Rack"], "midground": ["Sub Bass"], "background": ["Texture/FX"], "identity_carrier": "Break Cutup Rack", "move": "full chopped break with bass gaps", "transition_event": "mute final sixteenth"}
+  ],
+  "handoff": {
+    "requires_browser_search": true,
+    "browser_queries": ["Drum Rack", "short sine sub bass", "reverse noise and tape delay", "Beat Repeat"],
+    "requires_audio_import": true,
+    "sample_assets": [
+      {"track": "Break Cutup Rack", "source": "<user-provided-audio-path>", "rights_status": "private_test", "intended_use": "slice_to_drum_rack"}
+    ],
+    "cut_to_drum_rack_requests": [
+      {"track": "Break Cutup Rack", "source_file": "<user-provided-audio-path>", "method": "transient", "max_slices": 16, "create_trigger_clip": true}
+    ],
+    "export_target": "rough break cut-up loop render"
+  },
+  "finish_criteria": [
+    "16-bar break cut-up arrangement exists",
+    "break identity is revealed before heavy resequencing",
+    "sub bass avoids kick and snare anchors"
+  ]
+}

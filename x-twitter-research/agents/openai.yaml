@@ -1,0 +1,4 @@
+interface:
+  display_name: "X/Twitter Research"
+  short_description: "Research X/Twitter with logged-in Chrome"
+  default_prompt: "Use $x-twitter-research to research this keyword or X/Twitter URL with the logged-in Chrome session."

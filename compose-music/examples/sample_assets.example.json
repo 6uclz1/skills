@@ -7,7 +7,7 @@
       "original_bpm": 136,
       "bars": 4,
       "trim": "downbeat_aligned",
-      "rights_status": "user_provided"
+      "rights_status": "private_test"
     },
     {
       "id": "local_break_relative",
@@ -16,7 +16,7 @@
       "relative_path": "breaks/amen-style-break.wav",
       "original_bpm": 136,
       "bars": 4,
-      "rights_status": "user_provided"
+      "rights_status": "private_test"
     }
   ]
 }

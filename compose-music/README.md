@@ -8,7 +8,7 @@
 - Pattern generation for drum grids, basslines, chord loops, and melody motifs.
 - Loop-to-song arrangement using density, foreground/midground/background roles, moves, and transitions.
 - Ableton handoff through validated `composition_spec` and generated `ableton_handoff_plan` JSON.
-- User-provided sample workflows for audio loops and fixed-grid sliced break playback without embedding private paths.
+- User-provided sample workflows for audio loops, fixed-grid sliced break playback, and cut-up/sample-chop trigger patterns without embedding private paths.
 
 ## When To Use
 
@@ -33,6 +33,8 @@ Do not use this skill for pure Ableton command lookup, Remote Script installatio
 - **Pattern Mode**: one narrow unit such as a grid, bassline, chord loop, motif, or MIDI JSON.
 - **Song Sketch Mode**: human-readable loop-to-song arrangements without direct Ableton execution.
 - **Ableton Handoff Mode**: validated `composition_spec` plus concise human plan for implementation requests.
+- **Cut-up Pattern Mode**: symbolic slice grids and trigger notes for vocal chops, sample chops, break edits, and glitch/IDM-style resequencing.
+- **Cut-up Ableton Handoff Mode**: source material, rights status, slice plan, cut-up pattern, and handoff intent for Ableton implementation.
 - **Repair Mode**: diagnosis and minimal edits for an existing loop, progression, melody, or arrangement.
 
 Narrow requests should stay narrow. Do not emit a full song-sketch template when the user only asked for a bassline, chord options, or a grid conversion.
@@ -81,6 +83,12 @@ Convert an Amen slice trigger grid to note JSON:
 python3 compose-music/scripts/breakbeat_pattern_to_notes.py compose-music/examples/amen-break-trigger-grid.json --pretty
 ```
 
+Convert a symbolic vocal chop pattern to note JSON:
+
+```bash
+python3 compose-music/scripts/cutup_pattern_to_notes.py compose-music/examples/vocal-chop-2bar.pattern.json --pretty
+```
+
 Resolve a private sample asset from a user manifest:
 
 ```bash
@@ -122,5 +130,7 @@ The merge threshold is `score >= 0.9` for every prompt plus no failed structural
 `composition_spec` and `ableton_handoff_plan` contain musical intent and structured data only. Browser targets must be broad search queries such as `Drum Rack dry electronic kit` or `Operator bass`; exact paths, URIs, racks, kits, presets, and local files must come from active `$ableton-cli` browser search results.
 
 For user-owned audio, use `sample_assets` with `path_ref`, `root_env` plus `relative_path`, or a private manifest. Do not put `/Users/...`, `file://...`, or sample filenames into `browser_query` or `handoff.browser_queries`.
+
+For cut-up and sampling workflows, include `source_material`, `slice_plan`, `cutup_pattern`, and `rights_status`. If no audio has been supplied, use `<user-provided-audio-path>` and stop before Ableton audio import, transient analysis, or Drum Rack slicing until the user provides a cleared, original, royalty-free, or private-test file. `rights_status: unknown` is planning-only for public or commercial outputs.
 
 The handoff plan is an intermediate artifact. It does not operate on Ableton Live directly.

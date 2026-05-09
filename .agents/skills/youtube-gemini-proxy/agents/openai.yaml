@@ -1,0 +1,7 @@
+interface:
+  display_name: "YouTube Gemini Proxy"
+  short_description: "Analyze YouTube videos via Gemini CLI."
+  default_prompt: "Use $youtube-gemini-proxy to summarize this YouTube URL in Japanese."
+
+policy:
+  allow_implicit_invocation: true

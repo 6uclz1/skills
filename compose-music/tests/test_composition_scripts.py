@@ -411,7 +411,7 @@ class ValidateCompositionSpecTests(unittest.TestCase):
                     "original_bpm": 136.0,
                     "bars": 4,
                     "trim": "downbeat_aligned",
-                    "rights_status": "user_provided",
+                    "rights_status": "private_test",
                 }
             ],
             "tracks": [track],

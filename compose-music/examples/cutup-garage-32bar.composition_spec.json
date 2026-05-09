@@ -1,0 +1,126 @@
+{
+  "version": "1.0",
+  "brief": {
+    "genre": "cut-up garage",
+    "bpm": 134,
+    "meter": "4/4",
+    "key": "D",
+    "mode": "minor",
+    "length_bars": 32,
+    "creative_constraint": "only 12 vocal slices; no full lyric phrase",
+    "genre_traits": [
+      "sample slices are the identity carrier",
+      "stable garage-influenced drum anchor",
+      "negative space before hook entries"
+    ],
+    "sampling_policy": {
+      "allowed_sources": ["original", "cleared", "royalty_free", "private_test"],
+      "requires_user_provided_audio_for_execution": true
+    }
+  },
+  "tracks": [
+    {
+      "name": "Drums",
+      "role": "stable garage drum anchor",
+      "clip_length_bars": 2,
+      "browser_query": "Drum Rack dry garage kit",
+      "drum_rows": {
+        "Kick": "X... ..X. X... .X..",
+        "Clap": ".... X... .... X...",
+        "Hat": "X.X. X.X. X.X. X.X."
+      },
+      "timing_feel": "garage shuffle",
+      "swing_amount": 0.58,
+      "notes": [
+        {"pitch": 36, "start_time": 0.0, "duration": 0.25, "velocity": 110, "mute": false},
+        {"pitch": 39, "start_time": 1.0, "duration": 0.25, "velocity": 100, "mute": false}
+      ]
+    },
+    {
+      "name": "Cutup Rack",
+      "role": "foreground sample-slice identity",
+      "source_type": "sliced_audio",
+      "clip_length_bars": 2,
+      "browser_query": "Drum Rack slicing preset or empty Drum Rack",
+      "source_material": {
+        "kind": "user_audio_file",
+        "role": "vocal",
+        "path": "<user-provided-audio-path>",
+        "rights_status": "private_test",
+        "source_bpm": null,
+        "source_key": null
+      },
+      "slice_plan": {
+        "method": "transient",
+        "max_slices": 12,
+        "start_pad_midi": 36,
+        "create_trigger_clip": true,
+        "trigger_clip_slot": 1,
+        "warp_mode": "beats_or_complex_pro",
+        "preserve_timing": true
+      },
+      "cutup_pattern": {
+        "unit": "1/16",
+        "slice_map": {"S01": 36, "S02": 37, "S03": 38, "S04": 39, "S05": 40},
+        "motif": ["S01", ".", "S03", "S02", ".", "S04", ".", ".", "S02", ".", "S03", ".", "S04*2", "S01", ".", "."],
+        "variation_strategy": "change final beat only; use S04 stutter into section boundaries"
+      },
+      "notes": [
+        {"pitch": 36, "start_time": 0.0, "duration": 0.25, "velocity": 100, "mute": false},
+        {"pitch": 38, "start_time": 0.5, "duration": 0.25, "velocity": 88, "mute": false},
+        {"pitch": 37, "start_time": 0.75, "duration": 0.25, "velocity": 92, "mute": false},
+        {"pitch": 39, "start_time": 1.25, "duration": 0.25, "velocity": 95, "mute": false}
+      ],
+      "sound_intent": "short gated vocal slices with dry center image and delay throws only at boundaries",
+      "shape_intent": "fast attack, short release, low-cut to leave kick and bass clear"
+    },
+    {
+      "name": "Bass",
+      "role": "bouncy low-end answer",
+      "clip_length_bars": 2,
+      "browser_query": "Operator short garage bass",
+      "kick_relationship": "answer",
+      "notes": [
+        {"pitch": 38, "start_time": 0.75, "duration": 0.5, "velocity": 98, "mute": false},
+        {"pitch": 41, "start_time": 2.5, "duration": 0.5, "velocity": 92, "mute": false}
+      ]
+    },
+    {
+      "name": "Chords/Stabs",
+      "role": "short harmonic punctuation",
+      "clip_length_bars": 4,
+      "browser_query": "short minor organ stab",
+      "notes": []
+    },
+    {
+      "name": "Texture/FX",
+      "role": "delay throws and reverse boundaries",
+      "clip_length_bars": 8,
+      "browser_query": "noise sweep and delay effect",
+      "notes": []
+    }
+  ],
+  "sections": [
+    {"name": "Intro", "start_bar": 1, "length_bars": 8, "density": 1, "active_tracks": ["Drums", "Texture/FX"], "foreground": [], "midground": ["Texture/FX"], "background": ["Drums"], "identity_carrier": "Texture/FX", "move": "filtered drum anchor with no chop reveal", "transition_event": "one-beat silence before Groove"},
+    {"name": "Groove", "start_bar": 9, "length_bars": 8, "density": 3, "active_tracks": ["Drums", "Cutup Rack", "Bass"], "foreground": ["Cutup Rack"], "midground": ["Bass"], "background": ["Drums"], "identity_carrier": "Cutup Rack", "move": "state 1-bar chop motif", "transition_event": "S04 stutter on final beat"},
+    {"name": "Chop Reveal", "start_bar": 17, "length_bars": 8, "density": 4, "active_tracks": ["Drums", "Cutup Rack", "Bass", "Chords/Stabs"], "foreground": ["Cutup Rack"], "midground": ["Bass", "Chords/Stabs"], "background": ["Drums"], "identity_carrier": "Cutup Rack", "move": "change only final beat of 2-bar answer", "transition_event": "mute chops for beat 4 before Drop"},
+    {"name": "Drop Variation", "start_bar": 25, "length_bars": 8, "density": 5, "active_tracks": ["Drums", "Cutup Rack", "Bass", "Chords/Stabs", "Texture/FX"], "foreground": ["Cutup Rack"], "midground": ["Bass", "Chords/Stabs"], "background": ["Drums", "Texture/FX"], "identity_carrier": "Cutup Rack", "move": "heavier resequencing with boundary stutters", "transition_event": "reverse slice into final downbeat"}
+  ],
+  "handoff": {
+    "requires_browser_search": true,
+    "browser_queries": ["Drum Rack", "Drum Rack dry garage kit", "Operator short garage bass", "short minor organ stab", "Beat Repeat", "Simple Delay"],
+    "requires_audio_import": true,
+    "sample_assets": [
+      {"track": "Cutup Rack", "source": "<user-provided-audio-path>", "rights_status": "private_test", "intended_use": "slice_to_drum_rack"}
+    ],
+    "cut_to_drum_rack_requests": [
+      {"track": "Cutup Rack", "source_file": "<user-provided-audio-path>", "method": "transient", "max_slices": 12, "create_trigger_clip": true}
+    ],
+    "export_target": "rough cut-up arrangement render"
+  },
+  "finish_criteria": [
+    "32-bar cut-up garage arrangement exists",
+    "source audio remains placeholder until provided by user",
+    "bass answers kick and sample gaps"
+  ]
+}

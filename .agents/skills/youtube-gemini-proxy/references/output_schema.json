@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["video", "source", "result", "warnings"],
+  "additionalProperties": false,
+  "properties": {
+    "video": {
+      "type": "object",
+      "required": ["url", "video_id"],
+      "additionalProperties": false,
+      "properties": {
+        "url": { "type": "string" },
+        "video_id": { "type": "string" },
+        "title": { "type": ["string", "null"] },
+        "duration": { "type": ["string", "null"] },
+        "channel": { "type": ["string", "null"] }
+      }
+    },
+    "source": {
+      "type": "object",
+      "required": ["provider", "mode", "retrieved_at", "is_official_caption"],
+      "additionalProperties": false,
+      "properties": {
+        "provider": {
+          "type": "string",
+          "enum": [
+            "gemini-cli",
+            "gemini-api-video-fallback",
+            "youtube-data-api-captions"
+          ]
+        },
+        "mode": {
+          "type": "string",
+          "enum": ["summary", "transcript", "chapters", "claims", "captions"]
+        },
+        "retrieved_at": { "type": "string" },
+        "is_official_caption": { "type": "boolean" }
+      }
+    },
+    "result": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "summary": { "type": ["string", "null"] },
+        "key_points": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "topics": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "segments": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["timestamp", "text"],
+            "additionalProperties": false,
+            "properties": {
+              "timestamp": { "type": "string" },
+              "end_timestamp": { "type": ["string", "null"] },
+              "text": { "type": "string" },
+              "language": { "type": ["string", "null"] }
+            }
+          }
+        },
+        "chapters": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["timestamp", "title"],
+            "additionalProperties": false,
+            "properties": {
+              "timestamp": { "type": "string" },
+              "title": { "type": "string" },
+              "summary": { "type": "string" }
+            }
+          }
+        },
+        "claims": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["claim", "timestamp"],
+            "additionalProperties": false,
+            "properties": {
+              "timestamp": { "type": "string" },
+              "claim": { "type": "string" },
+              "confidence": { "type": "string" },
+              "needs_verification": { "type": "boolean" }
+            }
+          }
+        },
+        "transcript_type": { "type": ["string", "null"] }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}
