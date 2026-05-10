@@ -1,0 +1,4 @@
+interface:
+  display_name: "Pro Reasoning Research Output"
+  short_description: "Reason, research, cite, and compress"
+  default_prompt: "Use $pro-reasoning-research-output to answer this complex request with appropriate reasoning depth, web research, citations, uncertainty handling, and concise final synthesis."

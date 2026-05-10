@@ -1,0 +1,4 @@
+interface:
+  display_name: "Stock Market News Digest JP"
+  short_description: "Japanese equity news and market context digest"
+  default_prompt: "Use $stock-market-news-digest-jp to summarize the latest Japanese equity news, key stock materials, crowd trends, and US market spillovers."

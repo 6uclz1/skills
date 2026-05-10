@@ -1,0 +1,16 @@
+{
+  "failures": {
+    "F01": "Failed to browse when current information was required",
+    "F02": "Browsed unnecessarily for a pure rewriting or reasoning task",
+    "F03": "Used weak or outdated sources",
+    "F04": "Cited sources that do not support the claim",
+    "F05": "Collapsed facts and assumptions",
+    "F06": "Overstated confidence",
+    "F07": "Ignored contradictory evidence",
+    "F08": "Provided shallow reasoning",
+    "F09": "Produced verbose but low-density output",
+    "F10": "Exposed unnecessary internal reasoning instead of public rationale",
+    "F11": "Missed safety risks",
+    "F12": "Failed to provide an actionable deliverable"
+  }
+}

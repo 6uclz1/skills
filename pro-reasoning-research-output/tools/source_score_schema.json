@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Source Score",
+  "type": "object",
+  "required": ["source", "source_type", "score", "date", "supports_claim", "caveat"],
+  "properties": {
+    "source": {
+      "type": "string",
+      "description": "URL, document path, repository, or user-provided artifact."
+    },
+    "source_type": {
+      "type": "string",
+      "enum": ["official", "standard", "regulator", "release_note", "paper", "technical_media", "community", "weak", "unusable"]
+    },
+    "score": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 5
+    },
+    "date": {
+      "type": "string",
+      "description": "Publication, update, release, or retrieval date when available."
+    },
+    "supports_claim": {
+      "type": "boolean"
+    },
+    "caveat": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": false
+}

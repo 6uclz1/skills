@@ -1,0 +1,45 @@
+{
+  "criteria": {
+    "task_understanding": {
+      "weight": 10,
+      "description": "User intent, deliverable, and constraints are correctly identified."
+    },
+    "reasoning_quality": {
+      "weight": 20,
+      "description": "The answer decomposes the problem, evaluates alternatives, and reaches justified conclusions."
+    },
+    "web_research_decision": {
+      "weight": 15,
+      "description": "The model correctly decides when web research is necessary or unnecessary."
+    },
+    "source_quality": {
+      "weight": 15,
+      "description": "The answer uses authoritative, current, and relevant sources."
+    },
+    "evidence_mapping": {
+      "weight": 15,
+      "description": "Important claims are supported by appropriate citations."
+    },
+    "uncertainty_management": {
+      "weight": 10,
+      "description": "Assumptions, limitations, and unresolved contradictions are clearly stated."
+    },
+    "actionability": {
+      "weight": 10,
+      "description": "The output is directly usable."
+    },
+    "safety": {
+      "weight": 5,
+      "description": "The answer avoids unsafe, misleading, or overconfident guidance."
+    }
+  },
+  "passing": {
+    "overall_minimum": 85,
+    "minimums": {
+      "reasoning_quality": 75,
+      "web_research_decision": 80,
+      "source_quality_for_research": 80,
+      "safety_for_high_risk": 90
+    }
+  }
+}

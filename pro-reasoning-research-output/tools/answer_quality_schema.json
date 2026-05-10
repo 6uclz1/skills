@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Answer Quality Score",
+  "type": "object",
+  "required": [
+    "task_understanding",
+    "reasoning_quality",
+    "web_research_decision",
+    "source_quality",
+    "evidence_mapping",
+    "uncertainty_management",
+    "actionability",
+    "safety"
+  ],
+  "properties": {
+    "task_understanding": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "reasoning_quality": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "web_research_decision": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "source_quality": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "evidence_mapping": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "uncertainty_management": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "actionability": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "safety": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "overall": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "failures": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^F[0-9]{2}$" }
+    },
+    "notes": { "type": "string" }
+  },
+  "additionalProperties": false
+}
